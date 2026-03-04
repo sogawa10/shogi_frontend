@@ -1,4 +1,4 @@
-# 将棋AI (shogi-frontend)
+# 将棋AI (shogi_frontend)
 
 ## 概要
 
