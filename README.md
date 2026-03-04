@@ -13,33 +13,33 @@
 
 ## プロジェクト内のディレクトリ構成
 
-1. node_modulesフォルダ\
+1. **ode_modules**フォルダ\
    → npmでインストールされたライブラリが格納されるディレクトリ．`npm install`を実行すると自動的に生成される．容量が大きいため，通常はGitで管理しない．
-2. publicフォルダ\
+2. **public**フォルダ\
    → **静的ファイル**（画像や音楽，フォント等）を置いておく．ここに置かれたファイルは，ビルド時にそのまま公開ディレクトリにコピーされる．
-3. srcフォルダ\
+3. **src**フォルダ\
   → Reactのソースコードを配置するディレクトリ．
    - assetsフォルダ\
      → CSSなどの外部ファイルを配置する．
    - main.tsx\
      → **Reactアプリケーションのエントリーポイント**である．index.html内の`<div id="root"></div>`にReactアプリをマウントする処理が記述される．このファイルからトップレベルコンポーネントであるApp.tsxが読み込まれる．
-4. .gitignore\
+4. **.gitignore**\
    → GitHubにアップロードしたくないファイルを記述する．
-5. eslint.config.js\
+5. **eslint.config.js**\
    → コードの書き方のルールや，フォーマットを指定する設定ファイル．
-6. index.html\
+6. **ndex.html**\
    → **Webページの基本構造を定義する**HTMLファイル．`<div id="root"></div>`の部分にReactアプリケーションが挿入される．また，ページタイトルなどもこのファイルで設定できる．
-7. package-lock.json\
+7. **package-lock.json**\
    → ライブラリの依存関係を厳密に管理するためのファイル．特に触る必要はない．
-8. package.json\
+8. **ackage.json**\
    → **どのライブラリをどのバージョンで使うのか**と，**どんなコマンドを使えるのか**が書いてある．`npm install`を実行すると，記述されているライブラリがダウンロードされる．
-9. tsconfig.app.json\
+9. **sconfig.app.json**\
    → ブラウザ環境用のTypeScript設定ファイル．
-10. tsconfig.json\
+10. **tsconfig.json**\
    → 共通のTypeScript設定ファイル．
-11. tsconfig.node.json\
+11. **tsconfig.node.json**\
    → Node.js環境用のTypeScript設定ファイル．
-12. vite.config.ts\
+12. **vite.config.ts**\
    → Viteの設定ファイル．新規でプラグインを追加する等しない限り，特に触る必要はない．
 
 ## 使い方
