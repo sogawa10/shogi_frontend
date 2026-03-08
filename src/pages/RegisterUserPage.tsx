@@ -1,12 +1,10 @@
-import './LoginPage.css'
+import './RegisterUserPage.css'
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
 import { useState } from "react"
 // ボタンをクリックしたときに画面遷移を行う関数
 import { useNavigate } from 'react-router-dom';
-// 遷移元のページから渡されたstateを取得できる
-import { useLocation } from "react-router-dom"
 
-function LoginPage() {
+function RegisterUserPage() { 
   // useStateを定義
   const [user_name, set_user_name] = useState<string>("")
   const [password, set_password] = useState<string>("")
@@ -15,10 +13,6 @@ function LoginPage() {
   // 関数をnavigateに代入（以降navigate()で使用できる）
   const navigate = useNavigate();
 
-  // ?.により，stateが存在する場合だけmessageが代入される
-  const location = useLocation()
-  const message = location.state?.message
-
   // async → 関数内でawaitが使えるようになる
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     // フォーム送信時のページリロードを防ぐ（SPAではAPI通信＋再レンダリングで処理するため）
@@ -26,10 +20,10 @@ function LoginPage() {
 
     // エラー表示をリセットする
     set_error(null)
-    
+
     try {
       // awaitにより，API通信が終了するまで待つ
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         // リクエストメソッド
         method: 'POST',
         // リクエストヘッダ
@@ -48,12 +42,11 @@ function LoginPage() {
 
       if (response.ok) {
         set_error(null)
-        // レスポンスの内容を，ブラウザのSession Storageに保存
-        sessionStorage.setItem("user_id", data.user_id)
-        sessionStorage.setItem("user_name", user_name)
-        sessionStorage.setItem("access_token", data.access_token)
-        sessionStorage.setItem("exp", data.exp)
-        navigate("/home")
+        navigate("/login", {
+          state: {
+            message: "✓ 登録が完了しました。"
+          }
+        })
       } else {
         set_error(data.detail)
       }
@@ -64,15 +57,13 @@ function LoginPage() {
 
   return (
     <>
-      {/* 新規登録が成功した場合の表示 */}
-      {message && <p className="success">{message}</p>}
-      <form className="login-form" onSubmit={handleSubmit}>
+      <form className="register-form" onSubmit={handleSubmit}>
         {/* ユーザー名の入力 */}
-        <div className="field login-user-field">
-          <label htmlFor="user_name" className="label login-user-label">ユーザー名：</label>
+        <div className="field register-user-field">
+          <label htmlFor="user_name" className="label register-user-label">ユーザー名：</label>
           <input
             id="user_name"
-            className="input login-user-input"
+            className="input register-user-input"
             type="text"
             required
             placeholder="ユーザー名を入力"
@@ -81,11 +72,11 @@ function LoginPage() {
           />
         </div>
         {/* パスワードの入力 */}
-        <div className="field login-password-field">
-          <label htmlFor="password" className="label login-password-label">パスワード：</label>
+        <div className="field register-password-field">
+          <label htmlFor="password" className="label register-password-label">パスワード：</label>
           <input
             id="password"
-            className="input login-password-input"
+            className="input register-password-input"
             type="password"
             required
             placeholder="パスワードを入力"
@@ -95,11 +86,11 @@ function LoginPage() {
         </div>
         {/* エラーの表示 */}
         {error && <p className="error">{error}</p>}
-        {/* ログインボタン */}
-        <button className="login-button" type="submit">ログイン</button>
+        {/* 登録ボタン */}
+        <button className="register-button-" type="submit">登録</button>
       </form>
     </>
   )
 }
 
-export default LoginPage
+export default RegisterUserPage
