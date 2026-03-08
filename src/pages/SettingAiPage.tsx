@@ -1,4 +1,4 @@
-import './SettingAiPage.css'
+import '../assets/SettingAiPage.css'
 
 function SettingAiPage() { 
 

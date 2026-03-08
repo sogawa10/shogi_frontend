@@ -1,4 +1,4 @@
-import './SettingUserPage.css'
+import '../assets/SettingUserPage.css'
 
 function SettingUserPage() { 
 

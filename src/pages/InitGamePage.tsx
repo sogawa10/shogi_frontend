@@ -1,4 +1,4 @@
-import './InitGamePage.css'
+import '../assets/InitGamePage.css'
 
 function InitGamePage() { 
 

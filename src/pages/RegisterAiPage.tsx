@@ -1,4 +1,4 @@
-import './RegisterAiPage.css'
+import '../assets/RegisterAiPage.css'
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
 import { useState } from "react"
 

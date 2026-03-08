@@ -1,4 +1,4 @@
-import './RegisterUserPage.css'
+import '../assets/RegisterUserPage.css'
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
 import { useState } from "react"
 // ボタンをクリックしたときに画面遷移を行う関数

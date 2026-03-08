@@ -1,4 +1,4 @@
-import './HomePage.css'
+import '../assets/HomePage.css'
 // ボタンをクリックしたときに画面遷移を行う関数
 import { useNavigate } from 'react-router-dom';
 
