@@ -26,7 +26,7 @@ function RegisterAiPage() {
       // awaitにより，API通信が終了するまで待つ
       const response = await fetch(`${import.meta.env.VITE_API_URL}/ais`, {
         // リクエストメソッド
-        method: 'POST',
+        method: "POST",
         // リクエストヘッダ
         headers: {
           "Content-Type": "application/json",
@@ -46,6 +46,7 @@ function RegisterAiPage() {
         set_error(null)
         set_message("✓ 登録が完了しました。")
       } else {
+        set_message(null)
         set_error(data.detail)
       }
     } catch {

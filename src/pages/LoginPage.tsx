@@ -1,7 +1,7 @@
 import '../assets/LoginPage.css'
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
 import { useState } from "react"
-// ボタンをクリックしたときに画面遷移を行う関数
+// 画面遷移を行う関数
 import { useNavigate } from 'react-router-dom';
 // 遷移元のページから渡されたstateを取得できる
 import { useLocation } from "react-router-dom"
@@ -31,7 +31,7 @@ function LoginPage() {
       // awaitにより，API通信が終了するまで待つ
       const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
         // リクエストメソッド
-        method: 'POST',
+        method: "POST",
         // リクエストヘッダ
         headers: {
           "Content-Type": "application/json"

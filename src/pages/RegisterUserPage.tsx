@@ -1,7 +1,7 @@
 import '../assets/RegisterUserPage.css'
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
 import { useState } from "react"
-// ボタンをクリックしたときに画面遷移を行う関数
+// 画面遷移を行う関数
 import { useNavigate } from 'react-router-dom';
 
 function RegisterUserPage() { 
@@ -25,7 +25,7 @@ function RegisterUserPage() {
       // awaitにより，API通信が終了するまで待つ
       const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         // リクエストメソッド
-        method: 'POST',
+        method: "POST",
         // リクエストヘッダ
         headers: {
           "Content-Type": "application/json"

@@ -1,7 +1,7 @@
 // ログイン後のヘッダーやフッターを定義
 
 import './assets/LayoutHome.css'
-// とボタンをクリックしたときに画面遷移を行う関数
+// 画面遷移を行うリンクのコンポーネントと画面遷移を行う関数
 import { Link, useNavigate } from "react-router-dom"
 
 function Layout({ children }: { children: React.ReactNode }) {
