@@ -1,0 +1,16 @@
+.ai-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.ai-card.selected {
+  border: 2px solid blue;
+  background-color: #f0f6ff;
+}
+
+.setting-button-:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

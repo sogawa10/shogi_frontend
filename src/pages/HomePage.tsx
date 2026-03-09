@@ -1,4 +1,4 @@
-import '../assets/HomePage.css'
+import '../assets/HomePage.css';
 // 画面遷移を行う関数
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ function HomePage() {
         対局
       </button>
     </>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;

@@ -1,26 +1,26 @@
-import '../assets/RegisterAiPage.css'
+import '../assets/RegisterAiPage.css';
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
-import { useState } from "react"
+import { useState } from "react";
 
 function RegisterAiPage() { 
   // useStateを定義
-  const [ai_name, set_ai_name] = useState<string>("")
-  const [full_url, set_full_url] = useState<string>("")
-  const [message, set_message] = useState<string | null>(null)
-  const [error, set_error] = useState<string | null>(null)
+  const [ai_name, setAiName] = useState<string>("");
+  const [full_url, setFullUrl] = useState<string>("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // async → 関数内でawaitが使えるようになる
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    const token = sessionStorage.getItem("access_token")
+    const token = sessionStorage.getItem("access_token");
 
     // フォーム送信時のページリロードを防ぐ（SPAではAPI通信＋再レンダリングで処理するため）
-    e.preventDefault()
+    e.preventDefault();
 
     // メッセージをリセットする
-    set_message(null)
+    setMessage(null);
 
     // エラー表示をリセットする
-    set_error(null)
+    setError(null);
 
     try {
       // awaitにより，API通信が終了するまで待つ
@@ -37,22 +37,22 @@ function RegisterAiPage() {
           ai_name,
           full_url
         })
-      })
+      });
       
       // レスポンスボディを取り出す
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        set_error(null)
-        set_message("✓ 登録が完了しました。")
+        setError(null);
+        setMessage("✓ 登録が完了しました。");
       } else {
-        set_message(null)
-        set_error(data.detail)
-      }
+        setMessage(null);
+        setError(data.detail);
+      };
     } catch {
-      set_error("⚠ サーバーに接続できません。")
-    }
-  }
+      setError("⚠ サーバーに接続できません。");
+    };
+  };
 
   return (
     <>
@@ -67,7 +67,7 @@ function RegisterAiPage() {
             required
             placeholder="AIの名前を入力"
             value={ai_name}
-            onChange={(e) => set_ai_name(e.target.value)}
+            onChange={(e) => setAiName(e.target.value)}
           />
         </div>
         {/* APIのフルurlの入力 */}
@@ -80,7 +80,7 @@ function RegisterAiPage() {
             required
             placeholder="URLを入力"
             value={full_url}
-            onChange={(e) => set_full_url(e.target.value)}
+            onChange={(e) => setFullUrl(e.target.value)}
           />
         </div>
         {/* エラーの表示 */}
@@ -88,10 +88,10 @@ function RegisterAiPage() {
         {/* メッセージの表示 */}
         {message && <p className="message">{message}</p>}
         {/* 登録ボタン */}
-        <button className="register-button-" type="submit">登録</button>
+        <button className="register-button-" type="submit" disabled={ai_name === "" || full_url === ""}>登録</button>
       </form>
     </>
-  )
-}
+  );
+};
 
-export default RegisterAiPage
+export default RegisterAiPage;

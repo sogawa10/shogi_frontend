@@ -1,4 +1,4 @@
-import '../assets/InitGamePage.css'
+import '../assets/InitGamePage.css';
 
 function InitGamePage() { 
 
@@ -6,7 +6,7 @@ function InitGamePage() {
     <>
       <div>対局作成ページ</div>
     </>
-  )
-}
+  );
+};
 
-export default InitGamePage
+export default InitGamePage;

@@ -1,6 +1,4 @@
-// ログイン前のヘッダーやフッターを定義
-
-import './assets/LayoutAuth.css'
+import './assets/LayoutAuth.css';
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +10,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
     </>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

@@ -1,8 +1,8 @@
-import './assets/App.css'
+import './assets/App.css';
 // BrowserRouter → URLの変更を監視
 // Routes → 複数のRouteをまとめるためのコンテナ
 // Route → pathに一致するURLが呼ばれると，指定したコンポーネントを表示
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 // コンポーネントをインポート
 import ProtectedRoute from './ProtectedRoute.tsx';
 import AuthPage from './pages/AuthPage.tsx';
@@ -96,7 +96,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
-  )
-}
+  );
+};
 
-export default App
+export default App;
