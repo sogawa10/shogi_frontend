@@ -1,4 +1,3 @@
-import './assets/App.css';
 // BrowserRouter → URLの変更を監視
 // Routes → 複数のRouteをまとめるためのコンテナ
 // Route → pathに一致するURLが呼ばれると，指定したコンポーネントを表示
