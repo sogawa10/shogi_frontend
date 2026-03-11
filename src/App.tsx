@@ -14,6 +14,7 @@ import RegisterAiPage from './pages/RegisterAiPage.tsx';
 import InitGamePage from './pages/InitGamePage.tsx';
 import SettingUserPage from './pages/SettingUserPage.tsx';
 import SettingAiPage from './pages/SettingAiPage.tsx';
+import GamePage from './pages/GamePage.tsx';
 
 function App() {
   return (
@@ -89,6 +90,16 @@ function App() {
             <ProtectedRoute>
               <LayoutHome>
                 <SettingAiPage />
+              </LayoutHome>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game/:game_id"
+          element={
+            <ProtectedRoute>
+              <LayoutHome>
+                <GamePage />
               </LayoutHome>
             </ProtectedRoute>
           }
