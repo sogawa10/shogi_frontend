@@ -92,7 +92,7 @@ function SettingUserPage() {
         {/* エラーの表示 */}
         {error && <p className="error">{error}</p>}
         {/* 変更ボタン */}
-        <button className="setting-button-" type="submit" disabled={user_name === "" || password === ""}>変更する</button>
+        <button className="setting-button" type="submit" disabled={user_name === "" || password === ""}>変更する</button>
       </form>
     </>
   );

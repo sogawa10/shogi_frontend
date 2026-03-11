@@ -64,9 +64,9 @@ function LoginPage() {
 
   return (
     <>
-      {/* 新規登録が成功した場合の表示 */}
-      {message && <p className="success">{message}</p>}
       <form className="login-form" onSubmit={handleSubmit}>
+        {/* 新規登録が成功した場合の表示 */}
+        {message && <p className="success">{message}</p>}
         {/* ユーザー名の入力 */}
         <div className="field login-user-field">
           <label htmlFor="user_name" className="label login-user-label">ユーザー名：</label>

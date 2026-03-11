@@ -87,7 +87,7 @@ function RegisterUserPage() {
         {/* エラーの表示 */}
         {error && <p className="error">{error}</p>}
         {/* 登録ボタン */}
-        <button className="register-button-" type="submit" disabled={user_name === "" || password === ""}>登録</button>
+        <button className="register-button" type="submit" disabled={user_name === "" || password === ""}>登録</button>
       </form>
     </>
   );

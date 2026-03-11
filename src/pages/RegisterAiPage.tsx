@@ -88,7 +88,7 @@ function RegisterAiPage() {
         {/* メッセージの表示 */}
         {message && <p className="message">{message}</p>}
         {/* 登録ボタン */}
-        <button className="register-button-" type="submit" disabled={ai_name === "" || full_url === ""}>登録</button>
+        <button className="register-button" type="submit" disabled={ai_name === "" || full_url === ""}>登録</button>
       </form>
     </>
   );

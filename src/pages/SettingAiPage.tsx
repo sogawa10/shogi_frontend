@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 function SettingAiPage() { 
   // useStateを定義
   const [ai_list, setAiList] = useState<AI[]>([]);
-  const [selected_ai_id, setSelectedAiId] = useState<string | null>(null)
+  const [selected_ai_id, setSelectedAiId] = useState<string | null>(null);
   const [ai_name, setAiName] = useState<string>("");
   const [full_url, setFullUrl] = useState<string>("");
   const [message, setMessage] = useState<string | null>(null);
@@ -144,7 +144,7 @@ function SettingAiPage() {
         {/* メッセージの表示 */}
         {message && <p className="message">{message}</p>}
         {/* 変更ボタン */}
-        <button className="setting-button-" type="submit" disabled={selected_ai_id === null || ai_name === "" || full_url === ""}>変更する</button>
+        <button className="setting-button" type="submit" disabled={selected_ai_id === null || ai_name === "" || full_url === ""}>変更する</button>
       </form>
     </>
   );

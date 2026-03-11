@@ -1,0 +1,57 @@
+.mode-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.mode-card.selected {
+  border: 2px solid blue;
+  background-color: #f0f6ff;
+}
+
+.player2-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.player2-card.selected {
+  border: 2px solid blue;
+  background-color: #f0f6ff;
+}
+
+.turn-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.turn-card.selected {
+  border: 2px solid blue;
+  background-color: #f0f6ff;
+}
+
+.ai-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.ai-card.selected {
+  border: 2px solid blue;
+  background-color: #f0f6ff;
+}
+
+.setting-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.search-ai-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

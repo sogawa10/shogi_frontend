@@ -10,7 +10,7 @@
   background-color: #f0f6ff;
 }
 
-.setting-button-:disabled {
+.setting-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }

@@ -1,4 +1,4 @@
-.setting-button-:disabled {
+.setting-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
