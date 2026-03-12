@@ -26,7 +26,7 @@ function InitGamePage() {
     const token = sessionStorage.getItem("access_token");
 
     // async → 関数内でawaitが使えるようになる
-    const handleSubmitAi1 = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmitAi1 = async (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLInputElement>) => {
       // フォーム送信時のページリロードを防ぐ（SPAではAPI通信＋再レンダリングで処理するため）
       e.preventDefault();
 
@@ -66,7 +66,7 @@ function InitGamePage() {
     }
 
     // async → 関数内でawaitが使えるようになる
-    const handleSubmitAi2 = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmitAi2 = async (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLInputElement>) => {
       // フォーム送信時のページリロードを防ぐ（SPAではAPI通信＋再レンダリングで処理するため）
       e.preventDefault();
 
@@ -262,10 +262,15 @@ function InitGamePage() {
                 <input
                   className="input search-ai-input"
                   type="text"
-                  required
                   placeholder="ユーザー名かAIの名前を入力"
                   value={name2}
                   onChange={(e) => setName2(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" || name2 === "") return;
+                    handleSubmitAi2(e);
+                    setSelectedAiId2(null);
+                    setTurn(null);
+                  }}
                 />
                 <button
                   className="search-ai-button"
@@ -311,10 +316,19 @@ function InitGamePage() {
               <input
                 className="input search-ai1-input"
                 type="text"
-                required
                 placeholder="ユーザー名かAIの名前を入力"
                 value={name1}
                 onChange={(e) => setName1(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" || name1 === "") return;
+                  handleSubmitAi1(e);
+                  setSelectedAiId1(null);
+                  setPlayer2(null);
+                  setName2("");
+                  setAiList2([]);
+                  setSelectedAiId2(null);
+                  setTurn(null);
+                }}
               />
               <button
                 className="search-ai-button"
@@ -391,10 +405,15 @@ function InitGamePage() {
                     <input
                       className="input search-ai-input"
                       type="text"
-                      required
                       placeholder="ユーザー名かAIの名前を入力"
                       value={name2}
                       onChange={(e) => setName2(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" || name2 === "") return;
+                        handleSubmitAi2(e);
+                        setSelectedAiId2(null);
+                        setTurn(null);
+                      }}
                     />
                     <button
                       className="search-ai-button"
