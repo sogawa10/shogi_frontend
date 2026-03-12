@@ -9,11 +9,11 @@ function InitGamePage() {
     // useStateを定義
     const [mode, setMode] = useState<string | null>(null);
     const [player1, setPlayer1] = useState<string | null>(null);
-    const [ai_name1, setAiName1] = useState<string>("");
+    const [name1, setName1] = useState<string>("");
     const [ai_list1, setAiList1] = useState<AI[]>([]);
     const [selected_ai_id1, setSelectedAiId1] = useState<string | null>(null);
     const [player2, setPlayer2] = useState<string | null>(null);
-    const [ai_name2, setAiName2] = useState<string>("");
+    const [name2, setName2] = useState<string>("");
     const [ai_list2, setAiList2] = useState<AI[]>([]);
     const [selected_ai_id2, setSelectedAiId2] = useState<string | null>(null);
     const [turn, setTurn] = useState<string | null>(null);
@@ -38,7 +38,7 @@ function InitGamePage() {
 
       try {
         // awaitにより，API通信が終了するまで待つ
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/ais/${ai_name1}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/ais/${name1}`, {
           // リクエストメソッド
           method: "GET",
           // リクエストヘッダ
@@ -78,7 +78,7 @@ function InitGamePage() {
 
       try {
         // awaitにより，API通信が終了するまで待つ
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/ais/${ai_name2}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/ais/${name2}`, {
           // リクエストメソッド
           method: "GET",
           // リクエストヘッダ
@@ -193,11 +193,11 @@ function InitGamePage() {
               if (mode === "HUMAN VS AI") return;
               setMode("HUMAN VS AI");
               setPlayer1("USER");
-              setAiName1("");
+              setName1("");
               setAiList1([]);
               setSelectedAiId1(null);
               setPlayer2(null);
-              setAiName2("");
+              setName2("");
               setAiList2([]);
               setSelectedAiId2(null);
               setTurn(null);
@@ -211,11 +211,11 @@ function InitGamePage() {
               if (mode === "AI VS AI") return;
               setMode("AI VS AI");
               setPlayer1("THIRD_PARTY_AI");
-              setAiName1("");
+              setName1("");
               setAiList1([]);
               setSelectedAiId1(null);
               setPlayer2(null);
-              setAiName2("");
+              setName2("");
               setAiList2([]);
               setSelectedAiId2(null);
               setTurn(null);
@@ -225,7 +225,7 @@ function InitGamePage() {
           </div>
         </div>
         {/* プレーヤーの選択（人間 VS AIの場合） */}
-        {mode === "HUMAN VS AI" && (
+        {mode === "HUMAN VS AI" && 
           <div className="field register-player-field">
             <p className="player1-title">プレイヤー1の種別：あなた</p>
             <p className="register-player2-title">プレイヤー2の種別：</p>
@@ -234,7 +234,7 @@ function InitGamePage() {
               onClick={() => {
                 if (player2 === "FIRST_PARTY_AI") return;
                 setPlayer2("FIRST_PARTY_AI");
-                setAiName2("");
+                setName2("");
                 setAiList2([]);
                 setSelectedAiId2(null);
                 setTurn(null);
@@ -247,7 +247,7 @@ function InitGamePage() {
               onClick={() => {
                 if (player2 === "THIRD_PARTY_AI") return;
                 setPlayer2("THIRD_PARTY_AI");
-                setAiName2("");
+                setName2("");
                 setAiList2([]);
                 setSelectedAiId2(null);
                 setTurn(null);
@@ -256,30 +256,30 @@ function InitGamePage() {
               ユーザーが作成したAI
             </div>
             {/* THIRD_PARTY_AIの選択 */}
-            {player2 === "THIRD_PARTY_AI" && (
+            {player2 === "THIRD_PARTY_AI" && 
               <div className="field search-ai-field">
-                <label className="label search-ai-label">ユーザーが作成したAIの名前：</label>
+                <label className="label search-ai-label">ユーザー名かAIの名前：</label>
                 <input
                   className="input search-ai-input"
                   type="text"
                   required
-                  placeholder="ユーザーが作成したAIの名前を入力 "
-                  value={ai_name2}
-                  onChange={(e) => setAiName2(e.target.value)}
+                  placeholder="ユーザー名かAIの名前を入力"
+                  value={name2}
+                  onChange={(e) => setName2(e.target.value)}
                 />
                 <button
                   className="search-ai-button"
                   type="button"
-                  disabled={ai_name2 === ""}
+                  disabled={name2 === ""}
                   onClick={(e) => {
                     handleSubmitAi2(e);
                     setSelectedAiId2(null);
                     setTurn(null);
                   }}
                 >
-                  ユーザーが作成したAIを検索
+                  AIを検索
                 </button>
-                {ai_list2 && (
+                {ai_list2 && 
                   <div className="field ai-list">
                     {ai_list2.map((ai) => (
                       <div
@@ -296,43 +296,43 @@ function InitGamePage() {
                       </div>
                     ))}
                   </div>
-                )}
+                }
               </div>
-            )}
+            }
           </div>
-        )}
+        }
         {/* プレーヤーの選択（AI VS AIの場合） */}
-        {mode === "AI VS AI" && (
+        {mode === "AI VS AI" && 
           <div className="field register-player-field">
             <p className="player1-title">プレイヤー1の種別：ユーザーが作成したAI</p>
             {/* THIRD_PARTY_AIの選択 */}
             <div className="field search-ai-field">
-              <label className="label search-ai-label">ユーザーが作成したAIの名前：</label>
+              <label className="label search-ai-label">ユーザー名かAIの名前：</label>
               <input
                 className="input search-ai1-input"
                 type="text"
                 required
-                placeholder="ユーザーが作成したAIの名前を入力 "
-                value={ai_name1}
-                onChange={(e) => setAiName1(e.target.value)}
+                placeholder="ユーザー名かAIの名前を入力"
+                value={name1}
+                onChange={(e) => setName1(e.target.value)}
               />
               <button
                 className="search-ai-button"
                 type="button"
-                disabled={ai_name1 === ""}
+                disabled={name1 === ""}
                 onClick={(e) => {
                   handleSubmitAi1(e);
                   setSelectedAiId1(null);
                   setPlayer2(null);
-                  setAiName2("");
+                  setName2("");
                   setAiList2([]);
                   setSelectedAiId2(null);
                   setTurn(null);
                 }}
               >
-                ユーザーが作成したAIを検索
+                AIを検索
               </button>
-              {ai_list1 && (
+              {ai_list1 && 
                 <div className="field ai-list">
                   {ai_list1.map((ai) => (
                     <div
@@ -342,7 +342,7 @@ function InitGamePage() {
                         if (selected_ai_id1 === ai.ai_id) return;
                         setSelectedAiId1(ai.ai_id);
                         setPlayer2(null);
-                        setAiName2("");
+                        setName2("");
                         setAiList2([]);
                         setSelectedAiId2(null);
                         setTurn(null);
@@ -353,9 +353,9 @@ function InitGamePage() {
                     </div>
                   ))}
                 </div>
-              )}
+              }
             </div>
-            {selected_ai_id1 && (
+            {selected_ai_id1 && 
               <div className="field register-player2-field">
                 <p className="register-player2-title">プレイヤー2の種別：</p>
                 <div
@@ -363,7 +363,7 @@ function InitGamePage() {
                   onClick={() => {
                     if (player2 === "FIRST_PARTY_AI") return;
                     setPlayer2("FIRST_PARTY_AI");
-                    setAiName2("");
+                    setName2("");
                     setAiList2([]);
                     setSelectedAiId2(null);
                     setTurn(null);
@@ -376,7 +376,7 @@ function InitGamePage() {
                   onClick={() => {
                     if (player2 === "THIRD_PARTY_AI") return;
                     setPlayer2("THIRD_PARTY_AI");
-                    setAiName2("");
+                    setName2("");
                     setAiList2([]);
                     setSelectedAiId2(null);
                     setTurn(null);
@@ -385,30 +385,30 @@ function InitGamePage() {
                   ユーザーが作成したAI
                 </div>
                 {/* THIRD_PARTY_AIの選択 */}
-                {player2 === "THIRD_PARTY_AI" && (
+                {player2 === "THIRD_PARTY_AI" && 
                   <div className="field search-ai-field">
-                    <label className="label search-ai-label">ユーザーが作成したAIの名前：</label>
+                    <label className="label search-ai-label">ユーザー名かAIの名前：</label>
                     <input
                       className="input search-ai-input"
                       type="text"
                       required
-                      placeholder="ユーザーが作成したAIの名前を入力 "
-                      value={ai_name2}
-                      onChange={(e) => setAiName2(e.target.value)}
+                      placeholder="ユーザー名かAIの名前を入力"
+                      value={name2}
+                      onChange={(e) => setName2(e.target.value)}
                     />
                     <button
                       className="search-ai-button"
                       type="button"
-                      disabled={ai_name2 === ""}
+                      disabled={name2 === ""}
                       onClick={(e) => {
                         handleSubmitAi2(e);
                         setSelectedAiId2(null);
                         setTurn(null);
                       }}
                     >
-                      ユーザーが作成したAIを検索
+                      AIを検索
                     </button>
-                    {ai_list2 && (
+                    {ai_list2 && 
                       <div className="field ai-list">
                         {ai_list2.filter((ai) => ai.ai_id !== selected_ai_id1).map((ai) => (
                           <div
@@ -425,13 +425,13 @@ function InitGamePage() {
                           </div>
                         ))}
                       </div>
-                    )}
+                    }
                   </div>
-                )}
+                }
               </div>
-            )}
+            }
           </div>
-        )}
+        }
         {/* 手番の選択 */}
         {mode && player1 && player2 && !(player1 === "THIRD_PARTY_AI" && selected_ai_id1 === null) && !(player2 === "THIRD_PARTY_AI" && selected_ai_id2 === null) &&(
           <div className="field register-turn-field">

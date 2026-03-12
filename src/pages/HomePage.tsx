@@ -8,16 +8,18 @@ function HomePage() {
 
   return (
     <>
-      <p className="hero-description">
-        みんなが作った将棋AIと対局したり、
-        AI同士を対局させたりできるコミュニティサイトです。
-      </p>
-      <button className="button register-ai-button" onClick={() => navigate("/register/ai")}>
-        AI登録
-      </button>
-      <button className="button init-game-button" onClick={() => navigate("/init-game")}>
-        対局
-      </button>
+      <div className="home">
+        <p className="hero-description">
+          みんなが作った将棋AIと対局したり、
+          AI同士を対局させたりできるコミュニティサイトです。
+        </p>
+        <button className="button register-ai-button" onClick={() => navigate("/register/ai")}>
+          AI登録
+        </button>
+        <button className="button init-game-button" onClick={() => navigate("/init-game")}>
+          対局
+        </button>
+      </div>
     </>
   );
 };
