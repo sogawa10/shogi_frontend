@@ -1,0 +1,70 @@
+.player-koma, .mochigoma-container {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.mochigoma {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.mochigoma img.koma {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.mochigoma-num {
+  position: absolute;
+  bottom: -3px;
+  right: 2px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  background: rgba(0,0,0,0.3);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.board {
+  position: relative;
+  width: 458px;
+  height: 500px;
+  background-image: url('/shogi_board.png');
+  background-size: cover;
+  background-position: center;
+  padding: 5px 5px;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+}
+
+.masu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.koma {
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.koma-OU { max-width: 90%; max-height: 90%; }
+.koma-HISHA { max-width: 88%; max-height: 88%; }
+.koma-KAKU { max-width: 88%; max-height: 88%; }
+.koma-KIN { max-width: 87%; max-height: 87%; }
+.koma-GIN { max-width: 87%; max-height: 87%; }
+.koma-KEI { max-width: 85%; max-height: 85%; }
+.koma-KYOU { max-width: 80%; max-height: 85%; }
+.koma-FU { max-width: 80%; max-height: 80%; }

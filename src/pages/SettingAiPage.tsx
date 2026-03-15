@@ -102,7 +102,7 @@ function SettingAiPage() {
         {/* 変更するAIを選択 */}
         <div className="ai-setting">
           <p className="ai-setting-title">どのAI情報を変更しますか？</p>
-          {ai_list.map((ai) => (
+          {ai_list.map((ai) => 
             <div
               key={ai.ai_id}
               className={`ai-card ${selected_ai_id === ai.ai_id ? "selected" : ""}`}
@@ -111,7 +111,7 @@ function SettingAiPage() {
               <p className="ai_name">AIの名前：{ai.ai_name}</p>
               <p className="full_url">APIのURL：{ai.full_url}</p>
             </div>
-          ))}
+          )}
         </div>
         {/* AI名の入力 */}
         <div className="field setting-ai-field">
