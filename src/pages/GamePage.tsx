@@ -1,5 +1,5 @@
 import '../assets/GamePage.css';
-import type { Game, Koma, Board, Mochigoma } from '../type.ts';
+import type { Game, KomaType, Koma, Board, Mochigoma } from '../type.ts';
 // urlパスパラメータを取得する
 import { useParams } from "react-router-dom";
 // 状態を管理するためのHooks　値を更新すると自動で再レンダリングされる
@@ -101,7 +101,7 @@ function GamePage() {
     board[6][7] = { type: "FU", owner: "sente", promoted: false };
     board[6][8] = { type: "FU", owner: "sente", promoted: false };
 
-    setBoard(board);
+    return board;
   };
 
   // 持ち駒を初期化
@@ -127,15 +127,182 @@ function GamePage() {
       }
     };
 
-    setMochigoma(mochigoma);
+    return mochigoma;
+  };
+
+  // 棋譜から対局を復元
+  const applyKifu = () => {
+    let currentBoard = initBoard(); 
+    let currentMochigoma = initMochigoma();
+    let last_turn: "sente" | "gote" = "gote";
+
+    if (!game_state?.kifu || game_state.kifu.trim() === "") {
+      setTurn("sente");
+      setBoard(currentBoard);
+      setMochigoma(currentMochigoma);
+      return;
+    }
+
+    // 棋譜を手に分割
+    const moves = game_state.kifu.trim().split(" ");
+
+    for (let move of moves) {
+      let turn_from_kifu: "sente" | "gote";
+      let move_koma: KomaType;
+      let cap_koma: Koma | null = null;
+      let tx: number; 
+      let ty: number;
+      let fx: number | null = null; 
+      let fy: number | null = null;
+
+      // 手番の確認
+      if (move[0] === "▲") {
+          turn_from_kifu = "sente";
+      } else if (move[0] === "△") {
+          turn_from_kifu = "gote";
+      } else {
+          setError("⚠ 棋譜が不正です。");
+          return;
+      };
+      if (last_turn === turn_from_kifu){
+          setError("⚠ 棋譜が不正です。");
+          return;
+      }
+      last_turn = turn_from_kifu;
+
+      // 移動先の座標を取得
+      if ((1 <= Number(move[1]) && Number(move[1]) <= 9) && (1 <= Number(move[2]) && Number(move[2]) <= 9)) {
+        tx = Number(move[1]) - 1;
+        ty = Number(move[2]) - 1;
+      } else {
+        setError("⚠ 棋譜が不正です。");
+        return;
+      };
+
+      // 移動させる駒を取得
+      if (move[3] === "王" || move[3] === "玉") {
+        move_koma = "OU";
+      } else if (move[3] === "金") {
+        move_koma = "KIN";
+      } else if (move[3] === "銀" || move[3] === "全") {
+        move_koma = "GIN";
+      } else if (move[3] === "桂" || move[3] === "圭") {
+        move_koma = "KEI";
+      } else if (move[3] === "香" || move[3] === "杏") {
+        move_koma = "KYOU";
+      } else if (move[3] === "飛" || move[3] === "龍") {
+        move_koma = "HISHA";
+      } else if (move[3] === "角" || move[3] === "馬") {
+        move_koma = "KAKU";
+      } else if (move[3] === "歩" || move[3] === "と") {
+        move_koma = "FU";
+      } else {
+        setError("⚠ 棋譜が不正です。");
+        return;
+      };
+
+      if (move.length === 8) {        // 移動（成らず）
+        // 移動元の座標を取得
+        if ((1 <= Number(move[5]) && Number(move[5]) <= 9) && (1 <= Number(move[6]) && Number(move[6]) <= 9)) {
+          fx = Number(move[5]) - 1;
+          fy = Number(move[6]) - 1;
+        } else {
+          setError("⚠ 棋譜が不正です。");
+          return;
+        };
+
+        // 取る駒があれば取得
+        if (currentBoard[ty][tx] !== null) {
+          cap_koma = currentBoard[ty][tx];
+        };
+
+        // 駒を動かす
+        if (move_koma === currentBoard[fy][fx]?.type) {
+          const from_koma = currentBoard[fy][fx];
+          if (from_koma) {
+            currentBoard[ty][tx] = from_koma;
+          };
+          currentBoard[fy][fx] = null;
+          if (cap_koma && cap_koma.type !== "OU") {
+            currentMochigoma[turn_from_kifu][cap_koma.type] = currentMochigoma[turn_from_kifu][cap_koma.type] + 1;
+          };
+        } else {
+          setError("⚠ 棋譜が不正です。");
+          return;
+        };
+
+      } else if (move.length === 9) { // 移動（成る）
+        // 成るかどうかの確認
+        if (move[4] !== "成") {
+          setError("⚠ 棋譜が不正です。");
+          return;
+        };
+
+        // 移動元の座標を取得
+        if ((1 <= Number(move[6]) && Number(move[6]) <= 9) && (1 <= Number(move[7]) && Number(move[7]) <= 9)) {
+          fx = Number(move[6]) - 1;
+          fy = Number(move[7]) - 1;
+        } else {
+          setError("⚠ 棋譜が不正です。");
+          return;
+        };
+
+        // 取る駒があれば取得
+        if (currentBoard[ty][tx] !== null) {
+          cap_koma = currentBoard[ty][tx];
+        };
+
+        // 駒を動かす
+        if (move_koma === currentBoard[fy][fx]?.type) {
+          const from_koma = currentBoard[fy][fx];
+          if (from_koma) {
+            from_koma.promoted = true;
+            currentBoard[ty][tx] = from_koma;
+          };
+          currentBoard[fy][fx] = null;
+          if (cap_koma && cap_koma.type !== "OU") {
+            currentMochigoma[turn_from_kifu][cap_koma.type] = currentMochigoma[turn_from_kifu][cap_koma.type] + 1;
+          };
+        } else {
+          setError("⚠ 棋譜が不正です。");
+          return;
+        };
+
+      } else if (move.length === 5) { // 打ち
+        // 打ちかどうかの確認
+        if (move[4] !== "打") {
+          setError("⚠ 棋譜が不正です。");
+          return;
+        };
+
+        // 移動
+        if (move_koma !== "OU" && currentMochigoma[turn_from_kifu][move_koma] >= 1) {
+          currentBoard[ty][tx] = { type: move_koma, owner: turn_from_kifu, promoted: false };
+          currentMochigoma[turn_from_kifu][move_koma] = currentMochigoma[turn_from_kifu][move_koma] - 1;
+        };
+
+      } else {
+        setError("⚠ 棋譜が不正です。");
+        return;
+      }; 
+    };
+
+    // useStateに反映
+    setTurn(last_turn === "sente" ? "gote" : "sente");
+    setBoard(currentBoard);
+    setMochigoma(currentMochigoma);
   };
 
   // useEffectを定義
   useEffect(() => {
+    setError(null);
     fetchGame();
-    initBoard();
-    initMochigoma();
   }, []);
+
+  useEffect(() => {
+    setError(null);
+    applyKifu();
+  }, [game_state]);
 
   return (
     <>
@@ -155,7 +322,7 @@ function GamePage() {
                   src={`/gote_${koma}.png`}
                   className={`koma koma-${koma}`}
                 />
-                <p className="moshigoma-num">{num}</p>
+                <p className="mochigoma-num">{num}</p>
               </div>
             )}
           </div>
@@ -199,7 +366,7 @@ function GamePage() {
                   src={`/sente_${koma}.png`}
                   className={`koma koma-${koma}`}
                 />
-                <p className="moshigoma-num">{num}</p>
+                <p className="mochigoma-num">{num}</p>
               </div>
             )}
           </div>

@@ -20,7 +20,7 @@ export type Game = {
   result: "SENTE_WIN" | "GOTE_WIN" | "DRAW" | null
 };
 
-type KomaType =
+export type KomaType =
   | "OU"
   | "KIN"
   | "GIN"
@@ -30,7 +30,7 @@ type KomaType =
   | "KAKU"
   | "FU"
 
-type MochigomaType = Exclude<KomaType, "OU">
+export type MochigomaType = Exclude<KomaType, "OU">
 
 export type Koma = {
   type: KomaType
