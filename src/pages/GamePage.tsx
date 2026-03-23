@@ -12,6 +12,7 @@ function GamePage() {
   const [game_state, setGameState] = useState<Game>();
   const [board, setBoard] = useState<Board>();
   const [mochigoma, setMochigoma] = useState<Mochigoma>();
+  const [move_number, setMoveNumber] = useState<number>();
   const [turn, setTurn] = useState<"sente" | "gote">("sente");
   const [error, setError] = useState<string | null>(null);
 
@@ -145,6 +146,7 @@ function GamePage() {
 
     // 棋譜を手に分割
     const moves = game_state.kifu.trim().split(" ");
+    setMoveNumber(moves.length);
 
     for (let move of moves) {
       let turn_from_kifu: "sente" | "gote";
@@ -293,6 +295,151 @@ function GamePage() {
     setMochigoma(currentMochigoma);
   };
 
+  // async → 関数内でawaitが使えるようになる
+  const moveAi = async () => {
+    let ai_move;
+    try {
+      if (turn === "sente") {
+        if (game_state?.sente_player_type === "FIRST_PARTY_AI") {
+          // awaitにより，API通信が終了するまで待つ
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/ai-move`, {
+            // リクエストメソッド
+            method: "POST",
+            // リクエストヘッダ
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          // レスポンスボディを取り出す
+          const data = await response.json();
+          if (response.ok) {
+            // ここに処理を追加
+          } else {
+            setError(data.detail);
+          };
+        } else if (game_state?.sente_player_type === "THIRD_PARTY_AI" && game_state?.sente_ai_url) {
+          // awaitにより，API通信が終了するまで待つ
+          const response1 = await fetch(game_state?.sente_ai_url, {
+            // リクエストメソッド
+            method: "POST",
+            // リクエストヘッダ
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            // JSON文字列に変換し，リクエストボディに格納
+            body: JSON.stringify({
+              kifu: game_state?.kifu
+            })
+          });
+          // レスポンスボディを取り出す
+          const data1 = await response1.json();
+          if (response1.ok) {
+            ai_move = data1.move;
+          } else {
+            setError(data1.detail);
+          };
+          // awaitにより，API通信が終了するまで待つ
+          const response2 = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/moves`, {
+            // リクエストメソッド
+            method: "POST",
+            // リクエストヘッダ
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            // JSON文字列に変換し，リクエストボディに格納
+            body: JSON.stringify({
+              move: ai_move
+            })
+          });
+          // レスポンスボディを取り出す
+          const data2 = await response2.json();
+          if (response2.ok) {
+            // ここに処理を追加
+          } else {
+            setError(data2.detail);
+          };
+        } else {
+          setError("⚠ プレイヤーが不正です。");
+          return;
+        };
+      } else if (turn === "gote") {
+        if (game_state?.gote_player_type === "FIRST_PARTY_AI") {
+          // awaitにより，API通信が終了するまで待つ
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/ai-move`, {
+            // リクエストメソッド
+            method: "POST",
+            // リクエストヘッダ
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          // レスポンスボディを取り出す
+          const data = await response.json();
+          if (response.ok) {
+            // ここに処理を追加
+          } else {
+            setError(data.detail);
+          };
+        } else if (game_state?.gote_player_type === "THIRD_PARTY_AI" && game_state?.gote_ai_url) {
+          // awaitにより，API通信が終了するまで待つ
+          const response1 = await fetch(game_state?.gote_ai_url, {
+            // リクエストメソッド
+            method: "POST",
+            // リクエストヘッダ
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            // JSON文字列に変換し，リクエストボディに格納
+            body: JSON.stringify({
+              kifu: game_state?.kifu
+            })
+          });
+          // レスポンスボディを取り出す
+          const data1 = await response1.json();
+          if (response1.ok) {
+            ai_move = data1.move;
+          } else {
+            setError(data1.detail);
+          };
+          // awaitにより，API通信が終了するまで待つ
+          const response2 = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/moves`, {
+            // リクエストメソッド
+            method: "POST",
+            // リクエストヘッダ
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            // JSON文字列に変換し，リクエストボディに格納
+            body: JSON.stringify({
+              move: ai_move
+            })
+          });
+          // レスポンスボディを取り出す
+          const data2 = await response2.json();
+          if (response2.ok) {
+            // ここに処理を追加
+          } else {
+            setError(data2.detail);
+          };
+        } else {
+          setError("⚠ プレイヤーが不正です。");
+          return;
+        };
+      } else {
+        setError("⚠ 手番が不正です。");
+        return;
+      };
+    } catch {
+      setError("⚠ サーバーに接続できません。");
+    };
+  };
+
   // useEffectを定義
   useEffect(() => {
     setError(null);
@@ -300,7 +447,7 @@ function GamePage() {
   }, []);
 
   useEffect(() => {
-    setError(null);
+    if (!game_state) return;
     applyKifu();
   }, [game_state]);
 
@@ -309,8 +456,8 @@ function GamePage() {
       <div className="game">
         {/* 上部のPlayerBar */}
         <div className="player-bar">
-          <div className="player-name">
-            {game_state && <h1>{game_state.gote_name}</h1>}
+          <div className="player-name-area">
+            {game_state && <h1 className="player-name">{game_state.gote_name}</h1>}
           </div>
           <div className="player-time">
             {/* 時間 */}
@@ -343,18 +490,13 @@ function GamePage() {
             ))}
           </div>
           <div className="information">
-            <div className="move-number">
-              {/* 手数 */}
-            </div>
-            <div className="kifu">
-              {/* 棋譜 */}
-            </div>
+            {move_number &&  <h1 className="move-number">{move_number} 手目</h1>}
           </div>
         </div>
         {/* 下部のPlayerBar */}
         <div className="player-bar">
-          <div className="player-name">
-            {game_state && <h1>{game_state.sente_name}</h1>}
+          <div className="player-name-area">
+            {game_state && <h1 className="player-name">{game_state.sente_name}</h1>}
           </div>
           <div className="player-time">
             {/* 時間 */}
