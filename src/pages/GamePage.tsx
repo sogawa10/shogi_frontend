@@ -13,7 +13,10 @@ function GamePage() {
   const [board, setBoard] = useState<Board>();
   const [mochigoma, setMochigoma] = useState<Mochigoma>();
   const [selected_from, setSelectedFrom] = useState<{x:number, y:number} | null>(null);
-  const [selected_to, setSelectedTo] = useState<{x:number, y:number} | null>(null);
+  const [selected_koma, setSelectedKoma] = useState<string | null>(null);
+  const [selected_koma_nari, setSelectedKomaNari] = useState<boolean>(false);
+  const [nari_popup, setNariPopup] = useState<boolean>(false);
+  const [is_nari_move, setIsNariMove] = useState<boolean>(false);
   const [move_number, setMoveNumber] = useState<number>();
   const [turn, setTurn] = useState<"sente" | "gote">("sente");
   const [error, setError] = useState<string | null>(null);
@@ -316,7 +319,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data = await response.json();
           if (response.ok) {
-            // ここに処理を追加
+            setTurn("gote");
           } else {
             setError(data.detail);
           };
@@ -359,7 +362,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
-            // ここに処理を追加
+            setTurn("gote");
           } else {
             setError(data2.detail);
           };
@@ -382,7 +385,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data = await response.json();
           if (response.ok) {
-            // ここに処理を追加
+            setTurn("sente");
           } else {
             setError(data.detail);
           };
@@ -425,7 +428,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
-            // ここに処理を追加
+            setTurn("sente");
           } else {
             setError(data2.detail);
           };
@@ -436,6 +439,83 @@ function GamePage() {
       } else {
         setError("⚠ 手番が不正です。");
         return;
+      };
+    } catch {
+      setError("⚠ サーバーに接続できません。");
+    };
+  };
+
+  // async → 関数内でawaitが使えるようになる
+  const moveUser = async (to: {x:number, y:number}) => {
+    // 手を生成
+    let koma;
+    if (turn === "sente" && selected_koma === "OU") {
+      koma = "王";
+    } else if (turn === "gote" && selected_koma === "OU") {
+      koma = "玉";
+    } else if (selected_koma && selected_koma_nari) {
+      if (selected_koma === "GIN") {
+        koma = "全";
+      } else if (selected_koma ==="KEI") {
+        koma = "圭";
+      } else if (selected_koma === "KYOU") {
+        koma = "杏";
+      } else if (selected_koma === "HISHA") {
+        koma = "龍";
+      } else if (selected_koma === "KAKU") {
+        koma = "馬";
+      } else if (selected_koma === "FU") {
+        koma = "と";
+      };
+    } else if (selected_koma) {
+      if (selected_koma === "KIN") {
+        koma = "金";
+      } else if (selected_koma === "GIN") {
+        koma = "銀";
+      } else if (selected_koma ==="KEI") {
+        koma = "桂";
+      } else if (selected_koma === "KYOU") {
+        koma = "香";
+      } else if (selected_koma === "HISHA") {
+        koma = "飛";
+      } else if (selected_koma === "KAKU") {
+        koma = "角";
+      } else if (selected_koma === "FU") {
+        koma = "歩";
+      };
+    };
+    const move = `${turn === "sente" ? "▲" : "△"}${to.x + 1}${to.y + 1}${koma}${is_nari_move ? "成" : ""}${!selected_from ? "打" : ""}${selected_from ? "(" : ""}${selected_from ? selected_from.x + 1 : ""}${selected_from ? selected_from.y + 1 : ""}${selected_from ? ")" : ""}`;
+    
+    console.log(move);
+
+    // useStateをリセット
+    setSelectedFrom(null);
+    setSelectedKoma(null);
+    setSelectedKomaNari(false);
+    setNariPopup(false);
+    setIsNariMove(false);
+
+    try {
+      // awaitにより，API通信が終了するまで待つ
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/moves`, {
+        // リクエストメソッド
+        method: "POST",
+        // リクエストヘッダ
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        // JSON文字列に変換し，リクエストボディに格納
+        body: JSON.stringify({
+          move: move
+        })
+      });
+      // レスポンスボディを取り出す
+      const data = await response.json();
+      if (response.ok) {
+        setTurn(turn === "sente" ? "gote" : "sente");
+      } else {
+        setError(data.detail);
       };
     } catch {
       setError("⚠ サーバーに接続できません。");
@@ -453,6 +533,16 @@ function GamePage() {
     applyKifu();
   }, [game_state]);
 
+  useEffect(() => {
+    if (!game_state) return;
+    if (
+      (turn === "sente" && game_state.sente_player_type !== "USER") ||
+      (turn === "gote" && game_state.gote_player_type !== "USER")
+    ) {
+      moveAi();
+    }
+  }, [turn, game_state]);
+
   return (
     <>
       <div className="game">
@@ -466,7 +556,28 @@ function GamePage() {
           </div>
           <div className="player-koma">
             {mochigoma && mochigoma.gote && Object.entries(mochigoma.gote).map(([koma, num], idx) => num !== 0 &&
-              <div key={idx} className="mochigoma">
+              <div
+                key={idx}
+                className={`
+                  mochigoma
+                  ${(!selected_from && selected_koma === koma && turn === "gote") ? "selected" : ""}
+                `}
+                onClick={() => {
+                  if (koma && !selected_koma && turn === "gote" && game_state?.gote_player_type === "USER") {
+                    setSelectedFrom(null);
+                    setSelectedKoma(koma);
+                    setSelectedKomaNari(false);
+                    setNariPopup(false);
+                    setIsNariMove(false);
+                  } else {
+                    setSelectedFrom(null);
+                    setSelectedKoma(null);
+                    setSelectedKomaNari(false);
+                    setNariPopup(false);
+                    setIsNariMove(false);
+                  };
+                }}
+              >
                 <img
                   src={`/gote_${koma}.png`}
                   className={`koma koma-${koma}`}
@@ -485,12 +596,41 @@ function GamePage() {
                   key={`${8-x}-${y}`}
                   className="masu"
                   onClick={() => {
-                    if (koma &&
+                    if (koma && !selected_from &&
                       ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
-                      ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))) {
+                      ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))
+                    ) {
                       setSelectedFrom({ x: 8-x, y });
+                      setSelectedKoma(koma.type);
+                      setSelectedKomaNari(false);
+                      if (koma.promoted) {
+                        setSelectedKomaNari(true);
+                      };
+                      setIsNariMove(false);
+                    } else if (selected_koma &&
+                      ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
+                      !((turn === "sente" && koma?.owner === "sente") || (turn === "gote" && koma?.owner === "gote"))
+                    ) {
+                      setNariPopup(false);
+                      setIsNariMove(false);
+                      if (!(selected_koma === "OU" || selected_koma === "KIN") && !selected_koma_nari && selected_from &&
+                        ((turn === "sente" && (selected_from.y <= 2 || y <= 2)) || (turn === "gote" && (selected_from.y >= 6 || y >= 6)))
+                      ) {
+                        if ((turn === "sente" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 0) || (selected_koma === "KEI" && y <= 1))) ||
+                          (turn === "gote" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 8) || (selected_koma === "KEI" && y >= 7)))
+                        ) {
+                          setIsNariMove(true);
+                        } else {
+                          setNariPopup(true);
+                        };
+                      };
+                      moveUser({ x: 8-x, y });
                     } else {
-                      setSelectedFrom(null);
+                    setSelectedFrom(null);
+                    setSelectedKoma(null);
+                    setSelectedKomaNari(false);
+                    setNariPopup(false);
+                    setIsNariMove(false);
                     };
                   }}
                 >
@@ -507,6 +647,26 @@ function GamePage() {
                 </div>
             ))}
           </div>
+          {nari_popup && (
+            <div className="nari-popup">
+              <button
+                onClick={() => {
+                  setNariPopup(false);
+                  setIsNariMove(true);
+                }}
+              >
+                成る
+              </button>
+              <button
+                onClick={() => {
+                  setNariPopup(false);
+                  setIsNariMove(false);
+                }}
+              >
+                成らず
+              </button>
+            </div>
+          )}
           <div className="information">
             {move_number &&  <h1 className="move-number">{move_number} 手目</h1>}
           </div>
@@ -521,7 +681,28 @@ function GamePage() {
           </div>
           <div className="player-koma">
             {mochigoma && mochigoma.sente && Object.entries(mochigoma.sente).map(([koma, num], idx) => num !== 0 &&
-              <div key={idx} className="mochigoma">
+              <div
+                key={idx}
+                className={`
+                  mochigoma
+                  ${(!selected_from && selected_koma === koma && turn === "sente") ? "selected" : ""}
+                `}
+                onClick={() => {
+                  if (koma && !selected_koma && turn === "sente" && game_state?.sente_player_type === "USER") {
+                    setSelectedFrom(null);
+                    setSelectedKoma(koma);
+                    setSelectedKomaNari(false);
+                    setNariPopup(false);
+                    setIsNariMove(false);
+                  } else {
+                    setSelectedFrom(null);
+                    setSelectedKoma(null);
+                    setSelectedKomaNari(false);
+                    setNariPopup(false);
+                    setIsNariMove(false);
+                  };
+                }}
+              >
                 <img
                   src={`/sente_${koma}.png`}
                   className={`koma koma-${koma}`}

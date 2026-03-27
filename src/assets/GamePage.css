@@ -19,6 +19,10 @@
   display: block;
 }
 
+.mochigoma.selected {
+  transform: translateY(-8px);
+}
+
 .mochigoma-num {
   position: absolute;
   bottom: -3px;
