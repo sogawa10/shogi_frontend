@@ -60,6 +60,10 @@
   pointer-events: none;
 }
 
+.koma.selected {
+  transform: translateY(-8px);
+}
+
 .koma-OU { max-width: 90%; max-height: 90%; }
 .koma-HISHA { max-width: 88%; max-height: 88%; }
 .koma-KAKU { max-width: 88%; max-height: 88%; }

@@ -12,6 +12,8 @@ function GamePage() {
   const [game_state, setGameState] = useState<Game>();
   const [board, setBoard] = useState<Board>();
   const [mochigoma, setMochigoma] = useState<Mochigoma>();
+  const [selected_from, setSelectedFrom] = useState<{x:number, y:number} | null>(null);
+  const [selected_to, setSelectedTo] = useState<{x:number, y:number} | null>(null);
   const [move_number, setMoveNumber] = useState<number>();
   const [turn, setTurn] = useState<"sente" | "gote">("sente");
   const [error, setError] = useState<string | null>(null);
@@ -479,11 +481,27 @@ function GamePage() {
           <div className="board">
             {board && board.map((row, y)=>
               row.slice().reverse().map((koma, x) =>
-                <div key={`${8-x}-${y}`} className="masu">
+                <div
+                  key={`${8-x}-${y}`}
+                  className="masu"
+                  onClick={() => {
+                    if (koma &&
+                      ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
+                      ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))) {
+                      setSelectedFrom({ x: 8-x, y });
+                    } else {
+                      setSelectedFrom(null);
+                    };
+                  }}
+                >
                   {koma && 
                     <img
                       src={`/${koma.owner}_${koma.type}${koma.promoted ? "_nari" : ""}.png`}
-                      className={`koma koma-${koma.type}`}
+                      className={`
+                        koma
+                        koma-${koma.type}
+                        ${(selected_from && selected_from.x === 8-x && selected_from.y === y) ? "selected" : ""}
+                      `}
                     />
                   }
                 </div>
