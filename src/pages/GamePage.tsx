@@ -295,9 +295,9 @@ function GamePage() {
     };
 
     // useStateに反映
-    setTurn(last_turn === "sente" ? "gote" : "sente");
     setBoard(currentBoard);
     setMochigoma(currentMochigoma);
+    setTurn(last_turn === "sente" ? "gote" : "sente");
   };
 
   // async → 関数内でawaitが使えるようになる
@@ -319,6 +319,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data = await response.json();
           if (response.ok) {
+            fetchGame();
             setTurn("gote");
           } else {
             setError(data.detail);
@@ -362,6 +363,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
+            fetchGame();
             setTurn("gote");
           } else {
             setError(data2.detail);
@@ -385,6 +387,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data = await response.json();
           if (response.ok) {
+            fetchGame();
             setTurn("sente");
           } else {
             setError(data.detail);
@@ -428,6 +431,7 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
+            fetchGame();
             setTurn("sente");
           } else {
             setError(data2.detail);
@@ -447,6 +451,12 @@ function GamePage() {
 
   // async → 関数内でawaitが使えるようになる
   const moveUser = async (to: {x:number, y:number}) => {
+    // ポップアップが消えるまで待機
+    while (true) {
+      console.log("待機中...");
+      if (!nari_popup) break;
+    };
+    
     // 手を生成
     let koma;
     if (turn === "sente" && selected_koma === "OU") {
@@ -486,7 +496,16 @@ function GamePage() {
     };
     const move = `${turn === "sente" ? "▲" : "△"}${to.x + 1}${to.y + 1}${koma}${is_nari_move ? "成" : ""}${!selected_from ? "打" : ""}${selected_from ? "(" : ""}${selected_from ? selected_from.x + 1 : ""}${selected_from ? selected_from.y + 1 : ""}${selected_from ? ")" : ""}`;
     
+
+
+
+
     console.log(move);
+
+
+
+
+
 
     // useStateをリセット
     setSelectedFrom(null);
@@ -512,7 +531,8 @@ function GamePage() {
       });
       // レスポンスボディを取り出す
       const data = await response.json();
-      if (response.ok) {
+      if (response.ok && data.is_legal_move) {
+        fetchGame();
         setTurn(turn === "sente" ? "gote" : "sente");
       } else {
         setError(data.detail);
@@ -530,6 +550,7 @@ function GamePage() {
 
   useEffect(() => {
     if (!game_state) return;
+    setError(null);
     applyKifu();
   }, [game_state]);
 
@@ -539,9 +560,10 @@ function GamePage() {
       (turn === "sente" && game_state.sente_player_type !== "USER") ||
       (turn === "gote" && game_state.gote_player_type !== "USER")
     ) {
+      setError(null);
       moveAi();
     }
-  }, [turn, game_state]);
+  }, [turn]);
 
   return (
     <>
