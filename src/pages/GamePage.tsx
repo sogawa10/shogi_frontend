@@ -490,17 +490,6 @@ function GamePage() {
     };
     const move = `${turn === "sente" ? "▲" : "△"}${to && to.x + 1}${to && to.y + 1}${koma}${nari ? "成" : ""}${!selected_from ? "打" : ""}${selected_from ? "(" : ""}${selected_from ? selected_from.x + 1 : ""}${selected_from ? selected_from.y + 1 : ""}${selected_from ? ")" : ""}`;
     
-
-
-
-
-    console.log(move);
-
-
-
-
-
-
     // useStateをリセット
     setSelectedFrom(null);
     setSelectedTo(null);
