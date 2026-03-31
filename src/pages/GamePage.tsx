@@ -13,10 +13,10 @@ function GamePage() {
   const [board, setBoard] = useState<Board>();
   const [mochigoma, setMochigoma] = useState<Mochigoma>();
   const [selected_from, setSelectedFrom] = useState<{x:number, y:number} | null>(null);
+  const [selected_to, setSelectedTo] = useState<{x:number, y:number} | null>(null);
   const [selected_koma, setSelectedKoma] = useState<string | null>(null);
   const [selected_koma_nari, setSelectedKomaNari] = useState<boolean>(false);
   const [nari_popup, setNariPopup] = useState<boolean>(false);
-  const [is_nari_move, setIsNariMove] = useState<boolean>(false);
   const [move_number, setMoveNumber] = useState<number>();
   const [turn, setTurn] = useState<"sente" | "gote">("sente");
   const [error, setError] = useState<string | null>(null);
@@ -450,13 +450,7 @@ function GamePage() {
   };
 
   // async → 関数内でawaitが使えるようになる
-  const moveUser = async (to: {x:number, y:number}) => {
-    // ポップアップが消えるまで待機
-    while (true) {
-      console.log("待機中...");
-      if (!nari_popup) break;
-    };
-    
+  const moveUser = async (to: {x: number, y: number}, nari: boolean) => {
     // 手を生成
     let koma;
     if (turn === "sente" && selected_koma === "OU") {
@@ -494,7 +488,7 @@ function GamePage() {
         koma = "歩";
       };
     };
-    const move = `${turn === "sente" ? "▲" : "△"}${to.x + 1}${to.y + 1}${koma}${is_nari_move ? "成" : ""}${!selected_from ? "打" : ""}${selected_from ? "(" : ""}${selected_from ? selected_from.x + 1 : ""}${selected_from ? selected_from.y + 1 : ""}${selected_from ? ")" : ""}`;
+    const move = `${turn === "sente" ? "▲" : "△"}${to && to.x + 1}${to && to.y + 1}${koma}${nari ? "成" : ""}${!selected_from ? "打" : ""}${selected_from ? "(" : ""}${selected_from ? selected_from.x + 1 : ""}${selected_from ? selected_from.y + 1 : ""}${selected_from ? ")" : ""}`;
     
 
 
@@ -509,10 +503,10 @@ function GamePage() {
 
     // useStateをリセット
     setSelectedFrom(null);
+    setSelectedTo(null);
     setSelectedKoma(null);
     setSelectedKomaNari(false);
     setNariPopup(false);
-    setIsNariMove(false);
 
     try {
       // awaitにより，API通信が終了するまで待つ
@@ -587,16 +581,16 @@ function GamePage() {
                 onClick={() => {
                   if (koma && !selected_koma && turn === "gote" && game_state?.gote_player_type === "USER") {
                     setSelectedFrom(null);
+                    setSelectedTo(null);
                     setSelectedKoma(koma);
                     setSelectedKomaNari(false);
                     setNariPopup(false);
-                    setIsNariMove(false);
                   } else {
                     setSelectedFrom(null);
+                    setSelectedTo(null);
                     setSelectedKoma(null);
                     setSelectedKomaNari(false);
                     setNariPopup(false);
-                    setIsNariMove(false);
                   };
                 }}
               >
@@ -623,36 +617,38 @@ function GamePage() {
                       ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))
                     ) {
                       setSelectedFrom({ x: 8-x, y });
+                      setSelectedTo(null);
                       setSelectedKoma(koma.type);
                       setSelectedKomaNari(false);
                       if (koma.promoted) {
                         setSelectedKomaNari(true);
                       };
-                      setIsNariMove(false);
                     } else if (selected_koma &&
                       ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
                       !((turn === "sente" && koma?.owner === "sente") || (turn === "gote" && koma?.owner === "gote"))
                     ) {
+                      const to = { x: 8-x, y };
+                      setSelectedTo(to);
                       setNariPopup(false);
-                      setIsNariMove(false);
                       if (!(selected_koma === "OU" || selected_koma === "KIN") && !selected_koma_nari && selected_from &&
                         ((turn === "sente" && (selected_from.y <= 2 || y <= 2)) || (turn === "gote" && (selected_from.y >= 6 || y >= 6)))
                       ) {
                         if ((turn === "sente" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 0) || (selected_koma === "KEI" && y <= 1))) ||
                           (turn === "gote" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 8) || (selected_koma === "KEI" && y >= 7)))
                         ) {
-                          setIsNariMove(true);
+                          moveUser(to, true);
                         } else {
                           setNariPopup(true);
                         };
+                      } else {
+                        moveUser(to, false);
                       };
-                      moveUser({ x: 8-x, y });
                     } else {
                     setSelectedFrom(null);
+                    setSelectedTo(null);
                     setSelectedKoma(null);
                     setSelectedKomaNari(false);
                     setNariPopup(false);
-                    setIsNariMove(false);
                     };
                   }}
                 >
@@ -674,7 +670,8 @@ function GamePage() {
               <button
                 onClick={() => {
                   setNariPopup(false);
-                  setIsNariMove(true);
+                  if (!selected_to) return;
+                    moveUser(selected_to, true);
                 }}
               >
                 成る
@@ -682,7 +679,8 @@ function GamePage() {
               <button
                 onClick={() => {
                   setNariPopup(false);
-                  setIsNariMove(false);
+                  if (!selected_to) return;
+                    moveUser(selected_to, false);
                 }}
               >
                 成らず
@@ -712,16 +710,16 @@ function GamePage() {
                 onClick={() => {
                   if (koma && !selected_koma && turn === "sente" && game_state?.sente_player_type === "USER") {
                     setSelectedFrom(null);
+                    setSelectedTo(null);
                     setSelectedKoma(koma);
                     setSelectedKomaNari(false);
                     setNariPopup(false);
-                    setIsNariMove(false);
                   } else {
                     setSelectedFrom(null);
+                    setSelectedTo(null);
                     setSelectedKoma(null);
                     setSelectedKomaNari(false);
                     setNariPopup(false);
-                    setIsNariMove(false);
                   };
                 }}
               >
