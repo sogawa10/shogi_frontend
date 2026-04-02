@@ -6,8 +6,13 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 // 任意のタイミングで関数を実行するためのHooks　※リロード時と，第二引数（ [] ）に指定した変数の値が変更された時
 import { useEffect } from 'react';
+// 画面遷移を行う関数
+import { useNavigate } from 'react-router-dom';
 
 function GamePage() {
+  // 関数をnavigateに代入（以降navigate()で使用できる）
+  const navigate = useNavigate();
+
   // useStateを定義
   const [game_state, setGameState] = useState<Game>();
   const [board, setBoard] = useState<Board>();
@@ -18,7 +23,10 @@ function GamePage() {
   const [selected_koma_nari, setSelectedKomaNari] = useState<boolean>(false);
   const [nari_popup, setNariPopup] = useState<boolean>(false);
   const [move_number, setMoveNumber] = useState<number>();
-  const [turn, setTurn] = useState<"sente" | "gote">("sente");
+  const [turn, setTurn] = useState<"sente" | "gote" | null>(null);
+  const [game_status, setStatus] = useState<"PLAYING" | "FINISHED">("PLAYING");
+  const [result, setResult] = useState<"SENTE_WIN" | "GOTE_WIN" | "DRAW" | null>(null);
+  const [result_type, setResultType] = useState<"CHECKMATE" | "NYUGYOKU" | "SENNICHITE" | "RENZOKU_OTE_SENNICHITE" | "MAX_MOVE" | null>(null);
   const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -322,8 +330,14 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data = await response.json();
           if (response.ok) {
-            fetchGame();
-            setTurn("gote");
+            if (data.result === "SENTE_WIN" || data.result === "GOTE_WIN" || data.result === "DRAW") {
+              setStatus("FINISHED");
+              setResult(data.result);
+              setResultType(data.result_type);
+              fetchGame();
+            } else {
+              fetchGame();
+            };
           } else {
             setError(data.detail);
           };
@@ -366,8 +380,14 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
-            fetchGame();
-            setTurn("gote");
+            if (data2.result === "SENTE_WIN" || data2.result === "GOTE_WIN" || data2.result === "DRAW") {
+              setStatus("FINISHED");
+              setResult(data2.result);
+              setResultType(data2.result_type);
+              fetchGame();
+            } else {
+              fetchGame();
+            };
           } else {
             setError(data2.detail);
           };
@@ -390,8 +410,14 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data = await response.json();
           if (response.ok) {
-            fetchGame();
-            setTurn("sente");
+            if (data.result === "SENTE_WIN" || data.result === "GOTE_WIN" || data.result === "DRAW") {
+              setStatus("FINISHED");
+              setResult(data.result);
+              setResultType(data.result_type);
+              fetchGame();
+            } else {
+              fetchGame();
+            };
           } else {
             setError(data.detail);
           };
@@ -434,8 +460,14 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
-            fetchGame();
-            setTurn("sente");
+            if (data2.result === "SENTE_WIN" || data2.result === "GOTE_WIN" || data2.result === "DRAW") {
+              setStatus("FINISHED");
+              setResult(data2.result);
+              setResultType(data2.result_type);
+              fetchGame();
+            } else {
+              fetchGame();
+            };
           } else {
             setError(data2.detail);
           };
@@ -449,6 +481,8 @@ function GamePage() {
       };
     } catch {
       setError("⚠ サーバーに接続できません。");
+    } finally {
+      setIsThinking(false);
     };
   };
 
@@ -517,9 +551,19 @@ function GamePage() {
       });
       // レスポンスボディを取り出す
       const data = await response.json();
-      if (response.ok && data.is_legal_move) {
-        fetchGame();
-        setTurn(turn === "sente" ? "gote" : "sente");
+      if (response.ok) {
+        if (data.is_legal_move) {
+          if (data.result === "SENTE_WIN" || data.result === "GOTE_WIN" || data.result === "DRAW") {
+            setStatus("FINISHED");
+            setResult(data.result);
+            setResultType(data.result_type);
+            fetchGame();
+          } else {
+            fetchGame();
+          };
+        } else {
+          setError("非合法手です。");
+        };
       } else {
         setError(data.detail);
       };
@@ -527,6 +571,30 @@ function GamePage() {
       setError("⚠ サーバーに接続できません。");
     } finally {
       setIsThinking(false);
+    };
+  };
+
+  const showResult = () => {
+    if (result === "SENTE_WIN") {
+      return "先手の勝利です！";
+    } else if (result === "GOTE_WIN") {
+      return "後手の勝利です！";
+    } else if (result === "DRAW") {
+      return "引き分けです・・・";
+    };
+  };
+
+  const showResultType = () => {
+    if (result_type === "CHECKMATE") {
+      return "詰みです。";
+    } else if (result_type === "NYUGYOKU") {
+      return "入玉宣言法により、";
+    } else if (result_type === "SENNICHITE") {
+      return "千日手です。";
+    } else if (result_type === "RENZOKU_OTE_SENNICHITE") {
+      return "連続王手の千日手の反則で、";
+    } else if (result_type === "MAX_MOVE") {
+      return "最大手数に到達しました。";
     };
   };
 
@@ -543,6 +611,7 @@ function GamePage() {
   }, [game_state]);
 
   useEffect(() => {
+    if (game_status === "FINISHED") return;
     if (!game_state) return;
     if (
       (turn === "sente" && game_state.sente_player_type !== "USER") ||
@@ -565,7 +634,7 @@ function GamePage() {
             {/* 時間 */}
           </div>
           <div className="player-koma">
-            {mochigoma && mochigoma.gote && Object.entries(mochigoma.gote).map(([koma, num], idx) => num !== 0 &&
+            {game_status === "PLAYING" && mochigoma && mochigoma.gote && Object.entries(mochigoma.gote).map(([koma, num], idx) => num !== 0 &&
               <div
                 key={idx}
                 className={`
@@ -606,6 +675,7 @@ function GamePage() {
                   key={`${8-x}-${y}`}
                   className="masu"
                   onClick={() => {
+                    if (game_status === "FINISHED") return;
                     if (koma && !selected_from &&
                       ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
                       ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))
@@ -638,11 +708,11 @@ function GamePage() {
                         moveUser(to, false);
                       };
                     } else {
-                    setSelectedFrom(null);
-                    setSelectedTo(null);
-                    setSelectedKoma(null);
-                    setSelectedKomaNari(false);
-                    setNariPopup(false);
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(null);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
                     };
                   }}
                 >
@@ -659,9 +729,11 @@ function GamePage() {
                 </div>
             ))}
           </div>
-          {nari_popup && (
+          {/* 成りの選択ポップアップ */}
+          {game_status === "PLAYING" && nari_popup && (
             <div className="nari-popup">
               <button
+                className ="button nari-button"
                 onClick={() => {
                   setNariPopup(false);
                   if (!selected_to) return;
@@ -671,6 +743,7 @@ function GamePage() {
                 成る
               </button>
               <button
+                className ="button narazu-button"
                 onClick={() => {
                   setNariPopup(false);
                   if (!selected_to) return;
@@ -678,6 +751,16 @@ function GamePage() {
                 }}
               >
                 成らず
+              </button>
+            </div>
+          )}
+          {/* ゲーム結果の表示 */}
+          {game_status === "FINISHED" && (
+            <div className="game-result">
+              <p>{showResultType()}</p>
+              <h1>{showResult()}</h1>
+              <button onClick={() => navigate("/home")}>
+                対局を終了する。
               </button>
             </div>
           )}
@@ -694,7 +777,7 @@ function GamePage() {
             {/* 時間 */}
           </div>
           <div className="player-koma">
-            {mochigoma && mochigoma.sente && Object.entries(mochigoma.sente).map(([koma, num], idx) => num !== 0 &&
+            {game_status === "PLAYING" && mochigoma && mochigoma.sente && Object.entries(mochigoma.sente).map(([koma, num], idx) => num !== 0 &&
               <div
                 key={idx}
                 className={`
