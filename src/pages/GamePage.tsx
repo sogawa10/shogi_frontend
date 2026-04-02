@@ -19,6 +19,7 @@ function GamePage() {
   const [nari_popup, setNariPopup] = useState<boolean>(false);
   const [move_number, setMoveNumber] = useState<number>();
   const [turn, setTurn] = useState<"sente" | "gote">("sente");
+  const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // パラメータからgame_idを取得
@@ -302,6 +303,8 @@ function GamePage() {
 
   // async → 関数内でawaitが使えるようになる
   const moveAi = async () => {
+    if (isThinking) return;
+    setIsThinking(true);
     let ai_move;
     try {
       if (turn === "sente") {
@@ -522,6 +525,8 @@ function GamePage() {
       };
     } catch {
       setError("⚠ サーバーに接続できません。");
+    } finally {
+      setIsThinking(false);
     };
   };
 
