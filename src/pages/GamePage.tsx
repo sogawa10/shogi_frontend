@@ -600,17 +600,20 @@ function GamePage() {
 
   // useEffectを定義
   useEffect(() => {
+    console.log("Gameをフェッチ");
     setError(null);
     fetchGame();
   }, []);
 
   useEffect(() => {
+    console.log("棋譜を適用");
     if (!game_state) return;
     setError(null);
     applyKifu();
   }, [game_state]);
 
   useEffect(() => {
+    console.log("AIが指す");
     if (game_status === "FINISHED") return;
     if (!game_state) return;
     if (
