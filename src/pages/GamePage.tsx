@@ -23,6 +23,7 @@ function GamePage() {
   const [selected_koma_nari, setSelectedKomaNari] = useState<boolean>(false);
   const [nari_popup, setNariPopup] = useState<boolean>(false);
   const [move_number, setMoveNumber] = useState<number>();
+  const [last_move, setLastMove] = useState<string | null>(null);
   const [turn, setTurn] = useState<"sente" | "gote" | null>(null);
   const [game_status, setStatus] = useState<"PLAYING" | "FINISHED">("PLAYING");
   const [result, setResult] = useState<"SENTE_WIN" | "GOTE_WIN" | "DRAW" | null>(null);
@@ -150,6 +151,7 @@ function GamePage() {
     let currentBoard = initBoard(); 
     let currentMochigoma = initMochigoma();
     let last_turn: "sente" | "gote" = "gote";
+    let last_move: string | null = null;
 
     if (!game_state?.kifu || game_state.kifu.trim() === "") {
       setTurn("sente");
@@ -170,6 +172,8 @@ function GamePage() {
       let ty: number;
       let fx: number | null = null; 
       let fy: number | null = null;
+
+      last_move = move;
 
       // 手番の確認
       if (move[0] === "▲") {
@@ -307,6 +311,7 @@ function GamePage() {
     setBoard(currentBoard);
     setMochigoma(currentMochigoma);
     setTurn(last_turn === "sente" ? "gote" : "sente");
+    setLastMove(last_move);
   };
 
   // async → 関数内でawaitが使えるようになる
@@ -600,20 +605,17 @@ function GamePage() {
 
   // useEffectを定義
   useEffect(() => {
-    console.log("Gameをフェッチ");
     setError(null);
     fetchGame();
   }, []);
 
   useEffect(() => {
-    console.log("棋譜を適用");
     if (!game_state) return;
     setError(null);
     applyKifu();
   }, [game_state]);
 
   useEffect(() => {
-    console.log("AIが指す");
     if (game_status === "FINISHED") return;
     if (!game_state) return;
     if (
@@ -622,7 +624,7 @@ function GamePage() {
     ) {
       setError(null);
       moveAi();
-    }
+    };
   }, [turn]);
 
   return (
@@ -769,6 +771,7 @@ function GamePage() {
           )}
           <div className="information">
             {move_number &&  <h1 className="move-number">{move_number} 手目</h1>}
+            {last_move && <p className="last-move">直前の手： {last_move}</p>}
           </div>
         </div>
         {/* 下部のPlayerBar */}

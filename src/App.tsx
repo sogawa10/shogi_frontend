@@ -98,9 +98,9 @@ function App() {
           path="/game/:game_id"
           element={
             <ProtectedRoute>
-              <LayoutHome>
+              <LayoutAuth>
                 <GamePage />
-              </LayoutHome>
+              </LayoutAuth>
             </ProtectedRoute>
           }
         />
