@@ -37,6 +37,26 @@ function GamePage() {
   // トークンを取得
   const token = sessionStorage.getItem("access_token");
 
+  // タイムアウト付きのAPI呼び出し関数
+  const fetchWithTimeout = async (url: string, options: RequestInit, timeout :number) => {
+    // fetchを途中でキャンセルするためのオブジェクト
+    const controller = new AbortController();
+    // timeout秒後にcontroller.abort()が実行され，fetchが途中でキャンセルされる
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, {
+        // ...は中身を展開して張り付ける構文
+        ...options,
+        // このfetchはcontrollerで止められるようにするという設定
+        signal: controller.signal,
+      });
+      return response;
+    } finally {
+      // タイマーを解除
+      clearTimeout(id);
+    }
+  };
+
   // async → 関数内でawaitが使えるようになる
   const fetchGame = async () => {
     try {
@@ -322,6 +342,11 @@ function GamePage() {
     try {
       if (turn === "sente") {
         if (game_state?.sente_player_type === "FIRST_PARTY_AI") {
+          
+
+          console.log("内部Ai思考中");
+
+
           // awaitにより，API通信が終了するまで待つ
           const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/ai-move`, {
             // リクエストメソッド
@@ -347,8 +372,13 @@ function GamePage() {
             setError(data.detail);
           };
         } else if (game_state?.sente_player_type === "THIRD_PARTY_AI" && game_state?.sente_ai_url) {
+
+
+          console.log("外部Ai思考中");
+
+
           // awaitにより，API通信が終了するまで待つ
-          const response1 = await fetch(game_state?.sente_ai_url, {
+          const response1 = await fetchWithTimeout(game_state?.sente_ai_url, {
             // リクエストメソッド
             method: "POST",
             // リクエストヘッダ
@@ -360,11 +390,16 @@ function GamePage() {
             body: JSON.stringify({
               kifu: game_state?.kifu
             })
-          });
+          }, 60000);
           // レスポンスボディを取り出す
           const data1 = await response1.json();
           if (response1.ok) {
             ai_move = data1.move;
+
+
+            console.log(ai_move);
+
+
           } else {
             setError(data1.detail);
           };
@@ -385,13 +420,17 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
-            if (data2.result === "SENTE_WIN" || data2.result === "GOTE_WIN" || data2.result === "DRAW") {
-              setStatus("FINISHED");
-              setResult(data2.result);
-              setResultType(data2.result_type);
-              fetchGame();
+            if (data2.is_legal_move) {
+              if (data2.result === "SENTE_WIN" || data2.result === "GOTE_WIN" || data2.result === "DRAW") {
+                setStatus("FINISHED");
+                setResult(data2.result);
+                setResultType(data2.result_type);
+                fetchGame();
+              } else {
+                fetchGame();
+              };
             } else {
-              fetchGame();
+              setError("非合法手です。");
             };
           } else {
             setError(data2.detail);
@@ -402,6 +441,11 @@ function GamePage() {
         };
       } else if (turn === "gote") {
         if (game_state?.gote_player_type === "FIRST_PARTY_AI") {
+                    
+
+          console.log("内部Ai思考中");
+
+
           // awaitにより，API通信が終了するまで待つ
           const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/ai-move`, {
             // リクエストメソッド
@@ -427,8 +471,13 @@ function GamePage() {
             setError(data.detail);
           };
         } else if (game_state?.gote_player_type === "THIRD_PARTY_AI" && game_state?.gote_ai_url) {
+          
+
+          console.log("外部Ai思考中");
+
+
           // awaitにより，API通信が終了するまで待つ
-          const response1 = await fetch(game_state?.gote_ai_url, {
+          const response1 = await fetchWithTimeout(game_state?.gote_ai_url, {
             // リクエストメソッド
             method: "POST",
             // リクエストヘッダ
@@ -440,11 +489,16 @@ function GamePage() {
             body: JSON.stringify({
               kifu: game_state?.kifu
             })
-          });
+          }, 60000);
           // レスポンスボディを取り出す
           const data1 = await response1.json();
           if (response1.ok) {
             ai_move = data1.move;
+            
+
+            console.log(ai_move);
+
+
           } else {
             setError(data1.detail);
           };
@@ -465,13 +519,17 @@ function GamePage() {
           // レスポンスボディを取り出す
           const data2 = await response2.json();
           if (response2.ok) {
-            if (data2.result === "SENTE_WIN" || data2.result === "GOTE_WIN" || data2.result === "DRAW") {
-              setStatus("FINISHED");
-              setResult(data2.result);
-              setResultType(data2.result_type);
-              fetchGame();
+            if (data2.is_legal_move) {
+              if (data2.result === "SENTE_WIN" || data2.result === "GOTE_WIN" || data2.result === "DRAW") {
+                setStatus("FINISHED");
+                setResult(data2.result);
+                setResultType(data2.result_type);
+                fetchGame();
+              } else {
+                fetchGame();
+              };
             } else {
-              fetchGame();
+              setError("非合法手です。");
             };
           } else {
             setError(data2.detail);
@@ -484,8 +542,12 @@ function GamePage() {
         setError("⚠ 手番が不正です。");
         return;
       };
-    } catch {
-      setError("⚠ サーバーに接続できません。");
+    } catch (e: any) {
+      if (e.name === "AbortError") {
+        setError("⚠ タイムアウトしました");
+      } else {
+        setError("⚠ 通信エラー");
+      }
     } finally {
       setIsThinking(false);
     };
@@ -496,9 +558,9 @@ function GamePage() {
     // 手を生成
     let koma;
     if (turn === "sente" && selected_koma === "OU") {
-      koma = "王";
-    } else if (turn === "gote" && selected_koma === "OU") {
       koma = "玉";
+    } else if (turn === "gote" && selected_koma === "OU") {
+      koma = "王";
     } else if (selected_koma && selected_koma_nari) {
       if (selected_koma === "GIN") {
         koma = "全";
@@ -631,87 +693,29 @@ function GamePage() {
     <>
       <div className="game">
         {/* 上部のPlayerBar */}
-        <div className="player-bar">
-          <div className="player-name-area">
-            {game_state && <h1 className="player-name">{game_state.gote_name}</h1>}
-          </div>
-          <div className="player-time">
-            {/* 時間 */}
-          </div>
-          <div className="player-koma">
-            {game_status === "PLAYING" && mochigoma && mochigoma.gote && Object.entries(mochigoma.gote).map(([koma, num], idx) => num !== 0 &&
-              <div
-                key={idx}
-                className={`
-                  mochigoma
-                  ${(!selected_from && selected_koma === koma && turn === "gote") ? "selected" : ""}
-                `}
-                onClick={() => {
-                  if (koma && !selected_koma && turn === "gote" && game_state?.gote_player_type === "USER") {
-                    setSelectedFrom(null);
-                    setSelectedTo(null);
-                    setSelectedKoma(koma);
-                    setSelectedKomaNari(false);
-                    setNariPopup(false);
-                  } else {
-                    setSelectedFrom(null);
-                    setSelectedTo(null);
-                    setSelectedKoma(null);
-                    setSelectedKomaNari(false);
-                    setNariPopup(false);
-                  };
-                }}
-              >
-                <img
-                  src={`/gote_${koma}.png`}
-                  className={`koma koma-${koma}`}
-                />
-                <p className="mochigoma-num">{num}</p>
-              </div>
-            )}
-          </div>
-        </div>
-        {/* 盤面と対局情報 */}
-        <div className="game-center">
-          <div className="board">
-            {board && board.map((row, y)=>
-              row.slice().reverse().map((koma, x) =>
+        {game_state?.gote_player_type === "USER" &&
+          <div className="player-bar">
+            <div className="player-name-area">
+              {game_state && <h1 className="player-name">{game_state.sente_name}</h1>}
+            </div>
+            <div className="player-time">
+              {/* 時間 */}
+            </div>
+            <div className="player-koma">
+              {game_status === "PLAYING" && mochigoma && mochigoma.sente && Object.entries(mochigoma.sente).map(([koma, num], idx) => num !== 0 &&
                 <div
-                  key={`${8-x}-${y}`}
-                  className="masu"
+                  key={idx}
+                  className={`
+                    mochigoma
+                    ${(!selected_from && selected_koma === koma && turn === "sente") ? "selected" : ""}
+                  `}
                   onClick={() => {
-                    if (game_status === "FINISHED") return;
-                    if (koma && !selected_from &&
-                      ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
-                      ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))
-                    ) {
-                      setSelectedFrom({ x: 8-x, y });
+                    if (koma && !selected_koma && turn === "sente" && game_state?.sente_player_type === "USER") {
+                      setSelectedFrom(null);
                       setSelectedTo(null);
-                      setSelectedKoma(koma.type);
+                      setSelectedKoma(koma);
                       setSelectedKomaNari(false);
-                      if (koma.promoted) {
-                        setSelectedKomaNari(true);
-                      };
-                    } else if (selected_koma &&
-                      ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
-                      !((turn === "sente" && koma?.owner === "sente") || (turn === "gote" && koma?.owner === "gote"))
-                    ) {
-                      const to = { x: 8-x, y };
-                      setSelectedTo(to);
                       setNariPopup(false);
-                      if (!(selected_koma === "OU" || selected_koma === "KIN") && !selected_koma_nari && selected_from &&
-                        ((turn === "sente" && (selected_from.y <= 2 || y <= 2)) || (turn === "gote" && (selected_from.y >= 6 || y >= 6)))
-                      ) {
-                        if ((turn === "sente" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 0) || (selected_koma === "KEI" && y <= 1))) ||
-                          (turn === "gote" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 8) || (selected_koma === "KEI" && y >= 7)))
-                        ) {
-                          moveUser(to, true);
-                        } else {
-                          setNariPopup(true);
-                        };
-                      } else {
-                        moveUser(to, false);
-                      };
                     } else {
                       setSelectedFrom(null);
                       setSelectedTo(null);
@@ -721,19 +725,187 @@ function GamePage() {
                     };
                   }}
                 >
-                  {koma && 
-                    <img
-                      src={`/${koma.owner}_${koma.type}${koma.promoted ? "_nari" : ""}.png`}
-                      className={`
-                        koma
-                        koma-${koma.type}
-                        ${(selected_from && selected_from.x === 8-x && selected_from.y === y) ? "selected" : ""}
-                      `}
-                    />
-                  }
+                  <img
+                    src={`/sente_${koma}.png`}
+                    className={`koma gote-view koma-${koma}`}
+                  />
+                  <p className="mochigoma-num">{num}</p>
                 </div>
-            ))}
+              )}
+            </div>
           </div>
+        }
+        {game_state?.gote_player_type !== "USER" &&
+          <div className="player-bar">
+            <div className="player-name-area">
+              {game_state && <h1 className="player-name">{game_state.gote_name}</h1>}
+            </div>
+            <div className="player-time">
+              {/* 時間 */}
+            </div>
+            <div className="player-koma">
+              {game_status === "PLAYING" && mochigoma && mochigoma.gote && Object.entries(mochigoma.gote).map(([koma, num], idx) => num !== 0 &&
+                <div
+                  key={idx}
+                  className={`
+                    mochigoma
+                    ${(!selected_from && selected_koma === koma && turn === "gote") ? "selected" : ""}
+                  `}
+                  onClick={() => {
+                    if (koma && !selected_koma && turn === "gote" && game_state?.gote_player_type === "USER") {
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(koma);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
+                    } else {
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(null);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
+                    };
+                  }}
+                >
+                  <img
+                    src={`/gote_${koma}.png`}
+                    className={`koma koma-${koma}`}
+                  />
+                  <p className="mochigoma-num">{num}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        }  
+        {/* 盤面と対局情報 */}
+        <div className="game-center">
+          {game_state?.gote_player_type !== "USER" &&
+            <div className="board">
+              {board && board.map((row, y)=>
+                row.slice().reverse().map((koma, x) =>
+                  <div
+                    key={`${8-x}-${y}`}
+                    className="masu"
+                    onClick={() => {
+                      if (game_status === "FINISHED") return;
+                      if (koma && !selected_from &&
+                        ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
+                        ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))
+                      ) {
+                        setSelectedFrom({ x: 8-x, y });
+                        setSelectedTo(null);
+                        setSelectedKoma(koma.type);
+                        setSelectedKomaNari(false);
+                        if (koma.promoted) {
+                          setSelectedKomaNari(true);
+                        };
+                      } else if (selected_koma &&
+                        ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
+                        !((turn === "sente" && koma?.owner === "sente") || (turn === "gote" && koma?.owner === "gote"))
+                      ) {
+                        const to = { x: 8-x, y };
+                        setSelectedTo(to);
+                        setNariPopup(false);
+                        if (!(selected_koma === "OU" || selected_koma === "KIN") && !selected_koma_nari && selected_from &&
+                          ((turn === "sente" && (selected_from.y <= 2 || y <= 2)) || (turn === "gote" && (selected_from.y >= 6 || y >= 6)))
+                        ) {
+                          if ((turn === "sente" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 0) || (selected_koma === "KEI" && y <= 1))) ||
+                            (turn === "gote" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 8) || (selected_koma === "KEI" && y >= 7)))
+                          ) {
+                            moveUser(to, true);
+                          } else {
+                            setNariPopup(true);
+                          };
+                        } else {
+                          moveUser(to, false);
+                        };
+                      } else {
+                        setSelectedFrom(null);
+                        setSelectedTo(null);
+                        setSelectedKoma(null);
+                        setSelectedKomaNari(false);
+                        setNariPopup(false);
+                      };
+                    }}
+                  >
+                    {koma && 
+                      <img
+                        src={`/${koma.owner}_${koma.type}${koma.promoted ? "_nari" : ""}.png`}
+                        className={`
+                          koma
+                          koma-${koma.type}
+                          ${(selected_from && selected_from.x === 8-x && selected_from.y === y) ? "selected" : ""}
+                        `}
+                      />
+                    }
+                  </div>
+              ))}
+            </div>
+          }
+          {game_state?.gote_player_type === "USER" &&
+            <div className="board">
+              {board && board.slice().reverse().map((row, y)=>
+                row.map((koma, x) =>
+                  <div
+                    key={`${x}-${8 -y}`}
+                    className="masu"
+                    onClick={() => {
+                      if (game_status === "FINISHED") return;
+                      if (koma && !selected_from &&
+                        ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
+                        ((turn === "sente" && koma.owner === "sente") || (turn === "gote" && koma.owner === "gote"))
+                      ) {
+                        setSelectedFrom({ x, y: 8-y });
+                        setSelectedTo(null);
+                        setSelectedKoma(koma.type);
+                        setSelectedKomaNari(false);
+                        if (koma.promoted) {
+                          setSelectedKomaNari(true);
+                        };
+                      } else if (selected_koma &&
+                        ((turn === "sente" && game_state?.sente_player_type === "USER") || (turn === "gote" && game_state?.gote_player_type === "USER")) &&
+                        !((turn === "sente" && koma?.owner === "sente") || (turn === "gote" && koma?.owner === "gote"))
+                      ) {
+                        const to = { x, y: 8-y };
+                        setSelectedTo(to);
+                        setNariPopup(false);
+                        if (!(selected_koma === "OU" || selected_koma === "KIN") && !selected_koma_nari && selected_from &&
+                          ((turn === "sente" && (selected_from.y <= 2 || y >= 6)) || (turn === "gote" && (selected_from.y >= 6 || y <= 2)))
+                        ) {
+                          if ((turn === "sente" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 8) || (selected_koma === "KEI" && y >= 7))) ||
+                            (turn === "gote" && (((selected_koma  === "FU" || selected_koma === "KYOU") && y === 0) || (selected_koma === "KEI" && y <= 1)))
+                          ) {
+                            moveUser(to, true);
+                          } else {
+                            setNariPopup(true);
+                          };
+                        } else {
+                          moveUser(to, false);
+                        };
+                      } else {
+                        setSelectedFrom(null);
+                        setSelectedTo(null);
+                        setSelectedKoma(null);
+                        setSelectedKomaNari(false);
+                        setNariPopup(false);
+                      };
+                    }}
+                  >
+                    {koma && 
+                      <img
+                        src={`/${koma.owner}_${koma.type}${koma.promoted ? "_nari" : ""}.png`}
+                        className={`
+                          koma
+                          gote-view
+                          koma-${koma.type}
+                          ${(selected_from && selected_from.x === x && selected_from.y === 8-y) ? "selected" : ""}
+                        `}
+                      />
+                    }
+                  </div>
+              ))}
+            </div>
+          }
           {/* 成りの選択ポップアップ */}
           {game_status === "PLAYING" && nari_popup && (
             <div className="nari-popup">
@@ -775,46 +947,90 @@ function GamePage() {
           </div>
         </div>
         {/* 下部のPlayerBar */}
-        <div className="player-bar">
-          <div className="player-name-area">
-            {game_state && <h1 className="player-name">{game_state.sente_name}</h1>}
+        {game_state?.gote_player_type !== "USER" &&
+          <div className="player-bar">
+            <div className="player-name-area">
+              {game_state && <h1 className="player-name">{game_state.sente_name}</h1>}
+            </div>
+            <div className="player-time">
+              {/* 時間 */}
+            </div>
+            <div className="player-koma">
+              {game_status === "PLAYING" && mochigoma && mochigoma.sente && Object.entries(mochigoma.sente).map(([koma, num], idx) => num !== 0 &&
+                <div
+                  key={idx}
+                  className={`
+                    mochigoma
+                    ${(!selected_from && selected_koma === koma && turn === "sente") ? "selected" : ""}
+                  `}
+                  onClick={() => {
+                    if (koma && !selected_koma && turn === "sente" && game_state?.sente_player_type === "USER") {
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(koma);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
+                    } else {
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(null);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
+                    };
+                  }}
+                >
+                  <img
+                    src={`/sente_${koma}.png`}
+                    className={`koma koma-${koma}`}
+                  />
+                  <p className="mochigoma-num">{num}</p>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="player-time">
-            {/* 時間 */}
+        }
+        {game_state?.gote_player_type === "USER" &&
+          <div className="player-bar">
+            <div className="player-name-area">
+              {game_state && <h1 className="player-name">{game_state.gote_name}</h1>}
+            </div>
+            <div className="player-time">
+              {/* 時間 */}
+            </div>
+            <div className="player-koma">
+              {game_status === "PLAYING" && mochigoma && mochigoma.gote && Object.entries(mochigoma.gote).map(([koma, num], idx) => num !== 0 &&
+                <div
+                  key={idx}
+                  className={`
+                    mochigoma
+                    ${(!selected_from && selected_koma === koma && turn === "gote") ? "selected" : ""}
+                  `}
+                  onClick={() => {
+                    if (koma && !selected_koma && turn === "gote" && game_state?.gote_player_type === "USER") {
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(koma);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
+                    } else {
+                      setSelectedFrom(null);
+                      setSelectedTo(null);
+                      setSelectedKoma(null);
+                      setSelectedKomaNari(false);
+                      setNariPopup(false);
+                    };
+                  }}
+                >
+                  <img
+                    src={`/gote_${koma}.png`}
+                    className={`koma gote-view koma-${koma}`}
+                  />
+                  <p className="mochigoma-num">{num}</p>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="player-koma">
-            {game_status === "PLAYING" && mochigoma && mochigoma.sente && Object.entries(mochigoma.sente).map(([koma, num], idx) => num !== 0 &&
-              <div
-                key={idx}
-                className={`
-                  mochigoma
-                  ${(!selected_from && selected_koma === koma && turn === "sente") ? "selected" : ""}
-                `}
-                onClick={() => {
-                  if (koma && !selected_koma && turn === "sente" && game_state?.sente_player_type === "USER") {
-                    setSelectedFrom(null);
-                    setSelectedTo(null);
-                    setSelectedKoma(koma);
-                    setSelectedKomaNari(false);
-                    setNariPopup(false);
-                  } else {
-                    setSelectedFrom(null);
-                    setSelectedTo(null);
-                    setSelectedKoma(null);
-                    setSelectedKomaNari(false);
-                    setNariPopup(false);
-                  };
-                }}
-              >
-                <img
-                  src={`/sente_${koma}.png`}
-                  className={`koma koma-${koma}`}
-                />
-                <p className="mochigoma-num">{num}</p>
-              </div>
-            )}
-          </div>
-        </div>
+        }
         {error && <p className="error">{error}</p>}
       </div>
     </>

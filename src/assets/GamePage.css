@@ -64,7 +64,15 @@
   pointer-events: none;
 }
 
-.koma.selected {
+.gote-view {
+  transform: rotate(180deg);
+}
+
+.gote-view.selected {
+  transform: rotate(180deg) translateY(8px);
+}
+
+.koma.selected:not(.gote-view) {
   transform: translateY(-8px);
 }
 
@@ -110,7 +118,6 @@
   transform: scale(0.95);
 }
 
-/* 画面全体にオーバーレイ */
 .game-result {
   position: fixed;
   top: 0;
@@ -129,21 +136,18 @@
   color: #fff;
 }
 
-/* 勝敗タイプ（例：勝ち・負け） */
 .game-result p {
   font-size: 1.5rem;
   margin-bottom: 10px;
   opacity: 0.9;
 }
 
-/* メイン結果（例：あなたの勝ち！） */
 .game-result h1 {
   font-size: 3rem;
   margin-bottom: 30px;
   font-weight: bold;
 }
 
-/* ボタン */
 .game-result button {
   padding: 12px 24px;
   font-size: 1.2rem;
@@ -157,13 +161,11 @@
   transition: 0.2s;
 }
 
-/* ホバー時 */
 .game-result button:hover {
   background-color: #45a049;
   transform: scale(1.05);
 }
 
-/* クリック時 */
 .game-result button:active {
   transform: scale(0.98);
 }
