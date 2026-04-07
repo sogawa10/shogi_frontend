@@ -14,6 +14,26 @@ function SettingAiPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // タイムアウト付きのAPI呼び出し関数
+  const fetchWithTimeout = async (url: string, options: RequestInit, timeout :number) => {
+    // fetchを途中でキャンセルするためのオブジェクト
+    const controller = new AbortController();
+    // timeout秒後にcontroller.abort()が実行され，fetchが途中でキャンセルされる
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, {
+        // ...は中身を展開して張り付ける構文
+        ...options,
+        // このfetchはcontrollerで止められるようにするという設定
+        signal: controller.signal,
+      });
+      return response;
+    } finally {
+      // タイマーを解除
+      clearTimeout(id);
+    }
+  };
+
   // トークンを取得
   const token = sessionStorage.getItem("access_token");
 
@@ -62,8 +82,49 @@ function SettingAiPage() {
     setError(null);
 
     try {
+      let response1;
+      try {
+        // awaitにより，API通信が終了するまで待つ
+        response1 = await fetchWithTimeout(full_url, {
+          // リクエストメソッド
+          method: "POST",
+          // リクエストヘッダ
+          headers: {
+            "Content-Type": "application/json"
+          },
+          // JSON文字列に変換し，リクエストボディに格納
+          body: JSON.stringify({
+            kifu: ""
+          })
+        }, 10000);
+      } catch {
+        setError("⚠ URLが不正です。正しいURLを入力してください。");
+        return;
+      }
+
+      // レスポンスボディを取り出す
+      let data1;
+      try {
+        data1 = await response1.json();
+      } catch {
+        setError("⚠ URLが不正です。正しいURLを入力してください。");
+        return;
+      };
+
+      if (response1.ok) {
+        setError(null);
+        if (!("move" in data1)) {
+          setError("⚠ URLが不正です。正しいURLを入力してください。");
+          return;
+        };
+      } else {
+        setMessage(null);
+        setError("⚠ URLが不正です。正しいURLを入力してください。");
+        return;
+      };
+
       // awaitにより，API通信が終了するまで待つ
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ais/${selected_ai_id}`, {
+      const response2 = await fetch(`${import.meta.env.VITE_API_URL}/ais/${selected_ai_id}`, {
         // リクエストメソッド
         method: "PUT",
         // リクエストヘッダ
@@ -79,20 +140,25 @@ function SettingAiPage() {
       });
       
       // レスポンスボディを取り出す
-      const data = await response.json();
+      const data2 = await response2.json();
 
-      if (response.ok) {
+      if (response2.ok) {
         setSelectedAiId(null);
         setError(null);
         setMessage("✓ 登録が完了しました。");
       } else {
         setSelectedAiId(null);
         setMessage(null);
-        setError(data.detail);
+        setError(data2.detail);
       };
-    } catch {
-      setSelectedAiId(null);
-      setError("⚠ サーバーに接続できません。");
+    } catch (e: any) {
+      if (e.name === "AbortError") {
+        setSelectedAiId(null);
+        setError("⚠ APIサーバーからの応答がありません。");
+      } else {
+        setSelectedAiId(null);
+        setError("⚠ サーバーに接続できません。");
+      }
     };
   };
 

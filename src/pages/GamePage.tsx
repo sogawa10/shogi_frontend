@@ -342,11 +342,6 @@ function GamePage() {
     try {
       if (turn === "sente") {
         if (game_state?.sente_player_type === "FIRST_PARTY_AI") {
-          
-
-          console.log("内部Ai思考中");
-
-
           // awaitにより，API通信が終了するまで待つ
           const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/ai-move`, {
             // リクエストメソッド
@@ -372,19 +367,13 @@ function GamePage() {
             setError(data.detail);
           };
         } else if (game_state?.sente_player_type === "THIRD_PARTY_AI" && game_state?.sente_ai_url) {
-
-
-          console.log("外部Ai思考中");
-
-
           // awaitにより，API通信が終了するまで待つ
           const response1 = await fetchWithTimeout(game_state?.sente_ai_url, {
             // リクエストメソッド
             method: "POST",
             // リクエストヘッダ
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
+              "Content-Type": "application/json"
             },
             // JSON文字列に変換し，リクエストボディに格納
             body: JSON.stringify({
@@ -395,11 +384,6 @@ function GamePage() {
           const data1 = await response1.json();
           if (response1.ok) {
             ai_move = data1.move;
-
-
-            console.log(ai_move);
-
-
           } else {
             setError(data1.detail);
           };
@@ -441,11 +425,6 @@ function GamePage() {
         };
       } else if (turn === "gote") {
         if (game_state?.gote_player_type === "FIRST_PARTY_AI") {
-                    
-
-          console.log("内部Ai思考中");
-
-
           // awaitにより，API通信が終了するまで待つ
           const response = await fetch(`${import.meta.env.VITE_API_URL}/games/${game_id}/ai-move`, {
             // リクエストメソッド
@@ -471,19 +450,13 @@ function GamePage() {
             setError(data.detail);
           };
         } else if (game_state?.gote_player_type === "THIRD_PARTY_AI" && game_state?.gote_ai_url) {
-          
-
-          console.log("外部Ai思考中");
-
-
           // awaitにより，API通信が終了するまで待つ
           const response1 = await fetchWithTimeout(game_state?.gote_ai_url, {
             // リクエストメソッド
             method: "POST",
             // リクエストヘッダ
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
+              "Content-Type": "application/json"
             },
             // JSON文字列に変換し，リクエストボディに格納
             body: JSON.stringify({
@@ -494,11 +467,6 @@ function GamePage() {
           const data1 = await response1.json();
           if (response1.ok) {
             ai_move = data1.move;
-            
-
-            console.log(ai_move);
-
-
           } else {
             setError(data1.detail);
           };
@@ -544,9 +512,9 @@ function GamePage() {
       };
     } catch (e: any) {
       if (e.name === "AbortError") {
-        setError("⚠ タイムアウトしました");
+        setError("⚠ タイムアウトしました。");
       } else {
-        setError("⚠ 通信エラー");
+        setError("⚠ サーバーに接続できません。");
       }
     } finally {
       setIsThinking(false);
@@ -593,7 +561,7 @@ function GamePage() {
       };
     };
     const move = `${turn === "sente" ? "▲" : "△"}${to && to.x + 1}${to && to.y + 1}${koma}${nari ? "成" : ""}${!selected_from ? "打" : ""}${selected_from ? "(" : ""}${selected_from ? selected_from.x + 1 : ""}${selected_from ? selected_from.y + 1 : ""}${selected_from ? ")" : ""}`;
-    
+
     // useStateをリセット
     setSelectedFrom(null);
     setSelectedTo(null);
