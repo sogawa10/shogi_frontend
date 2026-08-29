@@ -1,16 +1,46 @@
-.ai-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
-  cursor: pointer;
+/* AI情報変更画面
+   カード / 選択状態(.selected) / ボタンの無効化は theme.css の共通スタイルを使用。
+   .setting-form はユーザー情報変更でも使うため、.ai-setting を含む
+   フォームだけに限定する。 */
+
+.setting-form:has(.ai-setting) {
+  max-width: 560px;
+  gap: var(--space-6);
 }
 
-.ai-card.selected {
-  border: 2px solid blue;
-  background-color: #f0f6ff;
+.setting-form:has(.ai-setting)::before {
+  content: "AI情報の変更";
 }
 
-.setting-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* --- 変更対象の AI を選ぶカード一覧 --- */
+.ai-setting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ai-setting-title {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sumi-soft);
+  margin-bottom: var(--space-1);
+}
+
+.ai-setting .ai-card .full_url {
+  word-break: break-all;
+}
+
+/* --- 変更後の値の入力 --- */
+.setting-full_url-input {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+/* 3項目すべて必須（対象AIの選択も含む）のため、扱いを補助テキストで明示する */
+.setting-form:has(.ai-setting) .setting-full_url-field::after {
+  content: "※ 変更しない項目は現在の値をそのまま入力してください。";
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--sumi-soft);
 }

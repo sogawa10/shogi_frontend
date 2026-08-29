@@ -1,0 +1,335 @@
+/* =============================================================
+   theme.css － 全ページ共通の基盤
+   - リセット
+   - デザイントークン（和風・将棋らしい配色）
+   - ベース要素スタイル
+   - 共通コンポーネント（ボタン / フォーム / カード / 通知）
+   main.tsx で一度だけ読み込む。
+   ============================================================= */
+
+/* ---------- デザイントークン ---------- */
+:root {
+  /* 和紙・木地の下地 */
+  --washi:        #f4ecdb; /* ページ背景（薄い和紙色） */
+  --washi-panel:  #fbf6ea; /* パネル・カードの面 */
+  --washi-sunken: #efe4cd; /* 一段沈んだ面（入力欄の外側など） */
+
+  /* 墨・木地の文字色 */
+  --sumi:         #2b2521; /* 本文（墨色） */
+  --sumi-soft:    #6b5f52; /* 補助文字・ラベル */
+  --sumi-faint:   #9a8c78; /* プレースホルダ等 */
+
+  /* 木地 */
+  --wood:         #b98d5c;
+  --wood-dark:    #8a6a44; /* カード枠・区切り線 */
+
+  /* 朱（アクセント：選択・主要ボタン） */
+  --shu:          #a83f2e;
+  --shu-dark:     #8a3123;
+  --shu-tint:     #f6e4dd; /* 選択カードの面 */
+
+  /* ヘッダー（既存の濃紺を踏襲） */
+  --header:       #2c3e50;
+  --header-line:  #3d5266;
+
+  /* 状態色 */
+  --danger:       #c0392b;
+  --danger-tint:  #fbe7e4;
+  --success:      #41703f;
+  --success-tint: #e7efe1;
+
+  /* 罫線 */
+  --border:       #d8c6a4;
+  --border-strong:#c3ac82;
+
+  /* 角丸 */
+  --radius-sm: 4px;
+  --radius:    8px;
+  --radius-lg: 14px;
+
+  /* 影 */
+  --shadow-sm: 0 1px 3px rgba(43, 35, 32, 0.12);
+  --shadow:    0 4px 14px rgba(43, 35, 32, 0.14);
+  --shadow-lg: 0 12px 32px rgba(43, 35, 32, 0.22);
+
+  /* 余白スケール */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+
+  /* 書体 */
+  --font-serif: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP",
+                "Sawarabi Mincho", "Yu Gothic", serif;
+  --font-sans:  "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo,
+                "Noto Sans JP", system-ui, sans-serif;
+
+  /* レイアウト定数 */
+  --header-h: 70px;
+}
+
+/* ---------- リセット ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--sumi);
+  background-color: var(--washi);
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---------- 共通：ボタン ---------- */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  padding: 10px 22px;
+  border: 1px solid var(--shu-dark);
+  border-radius: var(--radius);
+
+  background-color: var(--shu);
+  color: #fff;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease,
+    box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+button:hover {
+  background-color: var(--shu-dark);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--shu);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  background-color: #cbbfa8;
+  border-color: #b6a888;
+  color: #f3ede0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 補助的なボタン（木地色）。className に添えて使う */
+.button--sub {
+  background-color: var(--washi-panel);
+  border-color: var(--border-strong);
+  color: var(--sumi);
+}
+
+.button--sub:hover {
+  background-color: var(--washi-sunken);
+}
+
+/* ---------- 共通：フォーム ---------- */
+.login-form,
+.register-form,
+.setting-form {
+  width: 100%;
+  max-width: 440px;
+  margin-inline: auto;
+  padding: var(--space-6);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+
+  background-color: var(--washi-panel);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+/* フォーム見出し。各ページの CSS で content を指定したときだけ表示される。 */
+.login-form::before,
+.register-form::before,
+.setting-form::before {
+  align-self: stretch;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--sumi);
+  text-align: center;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sumi-soft);
+  letter-spacing: 0.02em;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+
+  background-color: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--sumi);
+
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: var(--sumi-faint);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--shu);
+  box-shadow: 0 0 0 3px var(--shu-tint);
+}
+
+/* フォーム末尾の送信ボタンは横幅いっぱいに */
+.login-form > button[type="submit"],
+.register-form > button[type="submit"],
+.setting-form > button[type="submit"] {
+  width: 100%;
+  padding: 12px 22px;
+  font-size: 16px;
+}
+
+/* ---------- 共通：選択カード ---------- */
+.ai-card,
+.mode-card,
+.player2-card,
+.turn-card {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--border-strong);
+  border-radius: var(--radius);
+
+  background-color: var(--washi-panel);
+  color: var(--sumi);
+  cursor: pointer;
+
+  transition: border-color 0.15s ease, background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ai-card:hover,
+.mode-card:hover,
+.player2-card:hover,
+.turn-card:hover {
+  border-color: var(--wood-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-card.selected,
+.mode-card.selected,
+.player2-card.selected,
+.turn-card.selected {
+  border-color: var(--shu);
+  border-left-color: var(--shu);
+  background-color: var(--shu-tint);
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-card p,
+.turn-card p {
+  margin: 0;
+}
+
+.ai-card .ai_name,
+.ai-card .full_url {
+  font-size: 13px;
+  color: var(--sumi-soft);
+}
+
+.ai-card .ai_name {
+  font-weight: 700;
+  color: var(--sumi);
+}
+
+/* ---------- 共通：通知（エラー / 成功 / メッセージ） ---------- */
+.error,
+.success,
+.message {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border-left: 4px solid currentColor;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.error {
+  color: var(--danger);
+  background-color: var(--danger-tint);
+}
+
+.success,
+.message {
+  color: var(--success);
+  background-color: var(--success-tint);
+}

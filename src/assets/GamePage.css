@@ -1,8 +1,111 @@
+/* =============================================================
+   対局画面のレイアウト（盤面まわりの装飾）
+   ※ .board / .masu / .koma / .koma-* / .gote-view の比率・寸法は
+     盤画像(458x500)に合わせてあるため変更しないこと。
+   ============================================================= */
+
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+
+  padding: var(--space-5);
+
+  background-color: var(--washi-panel);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.game-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+}
+
+/* 対局者バー：盤(458px)と横幅をそろえる */
+.player-bar {
+  width: 458px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  padding: var(--space-2) var(--space-3);
+
+  background-color: var(--washi-sunken);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+/* 下側のバー＝盤を見ている側（自分側 / 先手側）。少しだけ強調する */
+.game > .player-bar:last-of-type {
+  border-left-color: var(--shu);
+  box-shadow: var(--shadow-sm);
+}
+
+.player-name-area {
+  flex-shrink: 0;
+}
+
+.player-name {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sumi);
+  margin: 0;
+}
+
+.player-time {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--sumi-soft);
+  font-size: 14px;
+}
+
 .player-koma, .mochigoma-container {
   display: flex;
   flex-direction: row;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
+  min-height: 60px;
+  /* 取った駒が増えてもバーの高さを一定に保ち、あふれたら横スクロール */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* 手番・手数などの対局情報 */
+.information {
+  width: 458px;
+  max-width: 100%;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+
+  text-align: center;
+  color: var(--sumi);
+}
+
+.information:empty {
+  display: none;
+}
+
+.move-number {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.last-move {
+  color: var(--sumi-soft);
+  font-size: 14px;
+  margin: var(--space-1) 0 0;
 }
 
 .mochigoma {
@@ -82,40 +185,45 @@
   left: 50%;
   transform: translate(-50%, -50%);
 
-  background: #f5e6c8;
-  border: 3px solid #8b5a2b;
-  border-radius: 12px;
+  background: var(--washi-panel);
+  border: 3px solid var(--wood-dark);
+  border-radius: var(--radius-lg);
 
-  padding: 20px 30px;
+  padding: 22px 30px;
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 20px;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
 }
 
-.nari-popup button {
-  padding: 12px 20px;
+/* ポップアップの見出し（TSX にテキスト要素が無いので擬似要素で補う） */
+.nari-popup::before {
+  content: "成りますか？";
+  flex-basis: 100%;
+  text-align: center;
+  font-family: var(--font-serif);
   font-size: 18px;
-  font-weight: bold;
-
-  border: none;
-  border-radius: 8px;
-
-  background: #d2a679;
-  color: #fff;
-  cursor: pointer;
-
-  transition: all 0.2s ease;
+  font-weight: 700;
+  color: var(--sumi);
 }
 
-.nari-popup .button:hover {
-  background: #b8865b;
-  transform: scale(1.05);
+.nari-popup button {
+  padding: 12px 24px;
+  font-size: 18px;
 }
 
-.nari-popup .button:active {
-  transform: scale(0.95);
+/* 「成らず」は補助的な選択なので木地色に */
+.nari-popup .narazu-button {
+  background: var(--washi-sunken);
+  border-color: var(--border-strong);
+  color: var(--sumi);
+}
+
+.nari-popup .narazu-button:hover {
+  background: var(--washi);
 }
 
 .game-result {
@@ -125,49 +233,40 @@
   width: 100%;
   height: 100%;
 
-  background: rgba(0, 0, 0, 0.7); /* 暗い背景 */
+  background: rgba(30, 22, 18, 0.72); /* 墨がかった暗幕 */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
 
   z-index: 9999;
   text-align: center;
-  color: #fff;
+  color: var(--washi);
 }
 
 .game-result p {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  opacity: 0.9;
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+  color: #e7dcc6;
+  opacity: 0.85;
 }
 
 .game-result h1 {
-  font-size: 3rem;
-  margin-bottom: 30px;
-  font-weight: bold;
+  font-family: var(--font-serif);
+  font-size: 2.8rem;
+  margin-bottom: var(--space-6);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .game-result button {
-  padding: 12px 24px;
-  font-size: 1.2rem;
-
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 8px;
-
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.game-result button:hover {
-  background-color: #45a049;
-  transform: scale(1.05);
-}
-
-.game-result button:active {
-  transform: scale(0.98);
+  padding: 13px 30px;
+  font-size: 1.1rem;
 }
 
 .koma-OU { max-width: 90%; max-height: 90%; }

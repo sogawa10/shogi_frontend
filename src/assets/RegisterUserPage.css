@@ -1,4 +1,10 @@
-.setting-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* ユーザー新規登録画面。土台・入力欄・ボタン・エラー表示は theme.css の
+   共通コンポーネント（.register-form / .field / .label / .input / button /
+   .error）を使用する。
+
+   .register-form は AI登録・対局作成でも使うため、このページ固有の指定は
+   .register-user-field を含むフォームだけに限定する。 */
+
+.register-form:has(.register-user-field)::before {
+  content: "新規登録";
 }

@@ -1,4 +1,18 @@
-.setting-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* ユーザー情報変更画面。土台・入力欄・ボタン・エラー表示は theme.css の
+   共通コンポーネント（.setting-form / .field / .label / .input / button /
+   .error）を使用する。
+
+   .setting-form は AI情報変更でも使うため、このページ固有の指定は
+   .setting-user-field を含むフォームだけに限定する。 */
+
+.setting-form:has(.setting-user-field)::before {
+  content: "ユーザー情報の変更";
+}
+
+/* 両項目とも必須のため、変更しない項目の扱いを補助テキストで明示する */
+.setting-form:has(.setting-user-field) .setting-password-field::after {
+  content: "※ 変更しない項目は現在の値をそのまま入力してください。";
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--sumi-soft);
 }

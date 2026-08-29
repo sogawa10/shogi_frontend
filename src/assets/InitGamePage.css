@@ -1,57 +1,85 @@
-.mode-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
-  cursor: pointer;
+/* 対局作成画面
+   カード / 選択状態(.selected) / ボタンの無効化は theme.css の共通スタイルを使用。
+   ここではこのページ固有のレイアウトのみ定義する。
+   .register-form は新規登録・AI登録でも使うため、.register-mode-field を
+   含むフォームだけに限定する。 */
+
+.register-form:has(.register-mode-field) {
+  max-width: 560px;
+  gap: var(--space-6);
 }
 
-.mode-card.selected {
-  border: 2px solid blue;
-  background-color: #f0f6ff;
+/* --- 各セクションの見出し --- */
+.register-mode-title,
+.register-player2-title,
+.register-turn-title {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--sumi);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
 }
 
-.player2-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
-  cursor: pointer;
+/* 「プレイヤー1の種別：あなた」など、値だけを示す行 */
+.player1-title {
+  color: var(--sumi-soft);
+  font-size: 14px;
 }
 
-.player2-card.selected {
-  border: 2px solid blue;
-  background-color: #f0f6ff;
+/* --- 対局モード：主要な選択なので大きめの横並びトグルに --- */
+.register-mode-field {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
-.turn-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
-  cursor: pointer;
+.register-mode-field .register-mode-title {
+  flex-basis: 100%;
 }
 
-.turn-card.selected {
-  border: 2px solid blue;
-  background-color: #f0f6ff;
+.register-mode-field .mode-card {
+  flex: 1 1 160px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  padding-block: var(--space-4);
 }
 
-.ai-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
-  cursor: pointer;
+/* --- プレイヤー種別・手番のブロック --- */
+.register-player-field,
+.register-player2-field,
+.register-turn-field {
+  gap: var(--space-3);
 }
 
-.ai-card.selected {
-  border: 2px solid blue;
-  background-color: #f0f6ff;
+/* --- AI検索フィールド：ラベル → 入力 → ボタン → 結果リスト --- */
+.search-ai-field {
+  padding: var(--space-4);
+  background-color: var(--washi-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  gap: var(--space-3);
 }
 
-.setting-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.search-ai-field .search-ai-button {
+  align-self: flex-start;
+  padding: 9px 18px;
+  font-size: 14px;
 }
 
-.search-ai-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* 検索結果リスト（結果が無いときは枠だけ残さない） */
+.ai-list {
+  gap: var(--space-2);
+}
+
+.ai-list:empty {
+  display: none;
+}
+
+/* --- 対局開始ボタン --- */
+.register-button- {
+  padding: 16px 22px;
+  font-size: 18px;
 }

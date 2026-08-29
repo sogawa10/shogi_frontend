@@ -1,4 +1,23 @@
-.setting-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* AI登録画面。土台・入力欄・ボタン・通知は theme.css の共通コンポーネント
+   （.register-form / .field / .label / .input / button / .error / .message）を使用。
+
+   .register-form は新規登録・対局作成でも使うため、このページ固有の指定は
+   .register-ai-field を含むフォームだけに限定する。 */
+
+.register-form:has(.register-ai-field)::before {
+  content: "AI登録";
+}
+
+/* URL 欄は等幅寄りにして視認性を上げ、長い URL も折り返す */
+.register-full_url-input {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+/* API 仕様への導線を補助テキストとして添える（TSX は変更しない） */
+.register-form:has(.register-ai-field) .register-full_url-field::after {
+  content: "第三者AIのAPI仕様（棋譜を受け取り手を返す）に準拠したURLを入力してください。";
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--sumi-soft);
 }

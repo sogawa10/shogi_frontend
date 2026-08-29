@@ -1,4 +1,12 @@
-.setting-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* ログイン画面。フォームの土台・入力欄・ボタン・通知は theme.css の
+   共通コンポーネント（.login-form / .field / .label / .input / button /
+   .error / .success）を使用する。 */
+
+.login-form::before {
+  content: "ログイン";
+}
+
+/* 新規登録が成功した直後の案内は上部に表示される */
+.login-form .success {
+  margin-bottom: var(--space-1);
 }

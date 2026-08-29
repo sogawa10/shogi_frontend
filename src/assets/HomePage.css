@@ -1,0 +1,79 @@
+/* HomePage（ログイン後のトップ）
+   LayoutHome の .main（縦積み中央寄せ）内に <div class="home"> を置く構成。 */
+
+.home {
+  width: 100%;
+  max-width: 460px;
+  margin-inline: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+/* 紹介文（和紙カード。AuthPage と同じ朱の落款で世界観をそろえる） */
+.home .hero-description {
+  position: relative;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  margin-bottom: var(--space-3);
+
+  background-color: var(--washi-panel);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 2.1;
+  color: var(--sumi);
+  text-align: center;
+}
+
+.home .hero-description::before {
+  content: "将";
+  position: absolute;
+  top: calc(var(--space-5) * -1);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--shu);
+  color: #fff;
+  border-radius: 50%;
+  border: 2px solid var(--washi);
+
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.home .button {
+  width: 100%;
+  padding: 15px 22px;
+  font-size: 16px;
+}
+
+/* 対局が主導線。ひとまわり大きく強調する */
+.home .init-game-button {
+  padding: 18px 22px;
+  font-size: 18px;
+}
+
+/* AI登録は補助導線なので木地色に */
+.home .register-ai-button {
+  background-color: var(--washi-panel);
+  border-color: var(--border-strong);
+  color: var(--sumi);
+}
+
+.home .register-ai-button:hover {
+  background-color: var(--washi-sunken);
+}

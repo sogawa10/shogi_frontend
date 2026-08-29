@@ -1,0 +1,81 @@
+/* AuthPage（トップ / ログイン導線）
+   LayoutAuth の .main 直下に <p> と <button> 2つが並ぶ構成。
+   HomePage も .hero-description を持つため、必ず「.main の直接の子」に限定する。 */
+.main:has(> .hero-description) {
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* 紹介文（和紙カード。上部に朱の落款風の印を添える） */
+.main > .hero-description {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  margin-bottom: var(--space-3);
+
+  background-color: var(--washi-panel);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--wood-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 2.1;
+  color: var(--sumi);
+  text-align: center;
+}
+
+.main > .hero-description::before {
+  content: "将";
+  position: absolute;
+  top: calc(var(--space-5) * -1);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--shu);
+  color: #fff;
+  border-radius: 50%;
+  border: 2px solid var(--washi);
+
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ボタン2つ */
+.main:has(> .hero-description) .button {
+  width: 280px;
+  max-width: 100%;
+  padding: 14px 22px;
+  font-size: 16px;
+}
+
+.main:has(> .hero-description) .login-button {
+  margin-top: var(--space-1);
+}
+
+/* 新規登録は補助導線なので木地色に */
+.main:has(> .hero-description) .register-button {
+  background-color: var(--washi-panel);
+  border-color: var(--border-strong);
+  color: var(--sumi);
+}
+
+.main:has(> .hero-description) .register-button:hover {
+  background-color: var(--washi-sunken);
+}
+
+@media (max-width: 480px) {
+  .main:has(> .hero-description) .button {
+    width: 100%;
+  }
+}
